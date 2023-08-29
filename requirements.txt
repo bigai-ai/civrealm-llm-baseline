@@ -1,0 +1,7 @@
+tiktoken
+openai
+langchain
+pinecone-client
+func-timeout
+requests
+ipdb
