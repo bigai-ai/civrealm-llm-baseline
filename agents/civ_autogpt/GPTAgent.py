@@ -25,6 +25,7 @@ warnings.filterwarnings('ignore')
 
 cwd = os.getcwd()
 openai_keys_file = os.path.join(cwd, "agents/civ_autogpt/openai_keys.txt")
+saved_dialogue_file = os.path.join(cwd, "agents/civ_autogpt/saved_dialogues/saved_dialogue.txt")
 task_prompt_file = os.path.join(cwd, "agents/civ_autogpt/prompts/task_prompt.txt")
 state_prompt_file = os.path.join(cwd, "agents/civ_autogpt/prompts/state_prompt.txt")
 
@@ -127,6 +128,15 @@ class GPTAgent:
         with open(task_prompt_file, "r") as f:
             self.task_prompt = f.read()
         self.dialogue.append({"role": "user", "content": self.task_prompt})
+    
+    def load_saved_dialogue(self, load_path = saved_dialogue_file):
+        # print("reading task prompt from {}".format(task_prompt_file))
+        with open(load_path, "r") as f:
+            self.dialogue = eval(f.read())
+    
+    def save_dialogue_to_file(self, save_path = saved_dialogue_file):
+        with open(save_path, "w", encoding = 'utf-8') as f:
+            f.write(self.dialogue)
 
     def update_key(self):
         curr_key = self.openai_api_keys[0]

@@ -17,19 +17,23 @@ import random
 import numpy as np
 import time
 import json
+import os
 from freeciv_gym.agents.base_agent import BaseAgent
-# from freeciv_gym.agents.controller_agent import ControllerAgent
 from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
+from freeciv_gym.freeciv.utils.language_agent_utility import MOVE_NAMES, INVERSE_MOVE_NAMES
 from freeciv_gym.configs import fc_args
 from agents.civ_autogpt import GPTAgent
 
+cwd = os.getcwd()
 
 class LanguageAgent(BaseAgent):
-    def __init__(self, LLM_model = 'gpt-3.5-turbo'):
+    def __init__(self, LLM_model = 'gpt-3.5-turbo', load_dialogue = False):
         super().__init__()
         if "debug.agentseed" in fc_args:
             self.set_agent_seed(fc_args["debug.agentseed"])
         self.gpt_agent = GPTAgent(model = LLM_model)
+        if load_dialogue:
+            self.gpt_agent.load_saved_dialogue()
 
     def interact_with_llm_within_time_limit(self, input_prompt, current_ctrl_obj_name, avail_action_list, interact_timeout = 120):
         exec_action_name = None
@@ -64,14 +68,14 @@ class LanguageAgent(BaseAgent):
                 current_unit_obs = observations[ctrl_type][valid_actor_id]
                 fc_logger.debug(f'unit current obs: {current_unit_obs}')
 
-                current_avail_actions_list = [env.MOVE_NAMES[action_name] if action_name in env.MOVE_NAMES.keys() else action_name for action_name in valid_action_dict.keys()]
+                current_avail_actions_list = [MOVE_NAMES[action_name] if action_name in MOVE_NAMES.keys() else action_name for action_name in valid_action_dict.keys()]
 
                 obs_input_prompt = f"""The unit is {current_unit_name}, observation is {current_unit_obs}. Your available action list is {current_avail_actions_list}. """
                 print('current unit:', current_unit_name, '; unit id:', valid_actor_id)
                 
                 exec_action_name = self.interact_with_llm_within_time_limit(obs_input_prompt, current_unit_name, current_avail_actions_list)
                 try:
-                    exec_action_name = env.INVERSE_MOVE_NAMES[exec_action_name]
+                    exec_action_name = INVERSE_MOVE_NAMES[exec_action_name]
                 except:
                     pass
                 if exec_action_name:
@@ -102,6 +106,8 @@ class LanguageAgent(BaseAgent):
 
             else:
                 continue
+        local_time = time.localtime()
+        self.gpt_agent.save_dialogue_to_file(os.path.join(cwd, "agents/civ_autogpt/saved_dialogues/" + f"saved_dialogue_for_T{info['turn'] + 1}_at_{local_time.tm_year}_{local_time.tm_mon}_{local_time.tm_mday}.txt"))
         return None
     
     def get_next_valid_actor(self, info, unit_dict, desired_ctrl_type=None):
