@@ -53,7 +53,7 @@ class LanguageAgent(BaseAgent):
         for ctrl_type in available_actions.keys():
             if ctrl_type == 'unit':
 
-                unit_dict = env.get_actors_info(observations, ctrl_type, info)
+                unit_dict = observations[ctrl_type]['unit_dict']
                 fc_logger.debug(f'unit_dict: {unit_dict}')
                 valid_actor_id, valid_actor_name, valid_action_dict = self.get_next_valid_actor(info, unit_dict, ctrl_type)
                 
@@ -61,7 +61,7 @@ class LanguageAgent(BaseAgent):
                     continue
                 
                 current_unit_name = valid_actor_name
-                current_unit_obs = env.get_tiles_info(observations, ctrl_type, valid_actor_id)
+                current_unit_obs = observations[ctrl_type][valid_actor_id]
                 fc_logger.debug(f'unit current obs: {current_unit_obs}')
 
                 current_avail_actions_list = [env.MOVE_NAMES[action_name] if action_name in env.MOVE_NAMES.keys() else action_name for action_name in valid_action_dict.keys()]
@@ -78,7 +78,7 @@ class LanguageAgent(BaseAgent):
                     return valid_action_dict[exec_action_name]
 
             elif ctrl_type == 'city':
-                city_dict = env.get_actors_info(observations, ctrl_type, info)
+                city_dict = observations[ctrl_type]['city_dict']
                 fc_logger.debug(f'city_dict: {city_dict}')
 
                 valid_city_id, current_city_name, valid_city_actions_list = self.get_next_valid_actor(info, city_dict, ctrl_type)
@@ -86,7 +86,7 @@ class LanguageAgent(BaseAgent):
                 if not valid_city_id:
                     continue
 
-                current_city_obs = env.get_tiles_info(observations, ctrl_type, valid_city_id)
+                current_city_obs = observations[ctrl_type][valid_city_id]
 
                 current_city_avail_actions_list = [action_name for action_name in valid_city_actions_list.keys()]
 
