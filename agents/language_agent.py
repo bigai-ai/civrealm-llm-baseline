@@ -22,6 +22,7 @@ from freeciv_gym.agents.base_agent import BaseAgent
 from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
 from freeciv_gym.configs import fc_args
 from agents.civ_autogpt import GPTAgent
+from freeciv_gym.freeciv.utils.language_agent_utility import MOVE_NAMES, INVERSE_MOVE_NAMES
 
 
 class LanguageAgent(BaseAgent):
@@ -48,14 +49,14 @@ class LanguageAgent(BaseAgent):
         return exec_action_name
 
 
-    def act(self, env, observations, info):
+    def act(self, observations, info):
         available_actions = info['available_actions']
         for ctrl_type in available_actions.keys():
             if ctrl_type == 'unit':
 
                 unit_dict = observations[ctrl_type]['unit_dict']
                 fc_logger.debug(f'unit_dict: {unit_dict}')
-                valid_actor_id, valid_actor_name, valid_action_dict = self.get_next_valid_actor(info, unit_dict, ctrl_type)
+                valid_actor_id, valid_actor_name, valid_action_dict = self.get_valid_actor_actions(unit_dict, info, ctrl_type)
                 
                 if not valid_actor_id:
                     continue
@@ -64,14 +65,14 @@ class LanguageAgent(BaseAgent):
                 current_unit_obs = observations[ctrl_type][valid_actor_id]
                 fc_logger.debug(f'unit current obs: {current_unit_obs}')
 
-                current_avail_actions_list = [env.MOVE_NAMES[action_name] if action_name in env.MOVE_NAMES.keys() else action_name for action_name in valid_action_dict.keys()]
+                current_avail_actions_list = [MOVE_NAMES[action_name] if action_name in MOVE_NAMES.keys() else action_name for action_name in valid_action_dict.keys()]
 
                 obs_input_prompt = f"""The unit is {current_unit_name}, observation is {current_unit_obs}. Your available action list is {current_avail_actions_list}. """
                 print('current unit:', current_unit_name, '; unit id:', valid_actor_id)
                 
                 exec_action_name = self.interact_with_llm_within_time_limit(obs_input_prompt, current_unit_name, current_avail_actions_list)
                 try:
-                    exec_action_name = env.INVERSE_MOVE_NAMES[exec_action_name]
+                    exec_action_name = INVERSE_MOVE_NAMES[exec_action_name]
                 except:
                     pass
                 if exec_action_name:
@@ -81,7 +82,7 @@ class LanguageAgent(BaseAgent):
                 city_dict = observations[ctrl_type]['city_dict']
                 fc_logger.debug(f'city_dict: {city_dict}')
 
-                valid_city_id, current_city_name, valid_city_actions_list = self.get_next_valid_actor(info, city_dict, ctrl_type)
+                valid_city_id, current_city_name, valid_city_actions_list = self.get_valid_actor_actions(city_dict, info, ctrl_type)
                 
                 if not valid_city_id:
                     continue
@@ -103,7 +104,29 @@ class LanguageAgent(BaseAgent):
             else:
                 continue
         return None
-    
+
+    def get_valid_actor_actions(self, actor_dict, info, ctrl_type):
+        if info['turn'] != self.turn:
+            self.planned_actor_ids = []
+            self.turn = info['turn']
+
+        actor_id = None
+        actor_name = None
+        avail_actions = None
+        for actor in actor_dict:
+            if actor in self.planned_actor_ids:
+                continue
+
+            actor_name, actor_id = actor.split(' ')
+            self.planned_actor_ids.append(actor_id)
+
+            avail_actions = dict()
+            for action_name in actor_dict[actor_id]['avail_actions']:
+                avail_actions[action_name] = info[ctrl_type][actor_id][action_name]
+
+        return actor_id, actor_name, avail_actions
+
+
     def get_next_valid_actor(self, info, unit_dict, desired_ctrl_type=None):
         """
         Return the first actable actor_id and its valid_action_dict that has not been planned in this turn.
