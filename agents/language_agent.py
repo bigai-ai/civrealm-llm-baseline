@@ -17,20 +17,24 @@ import random
 import numpy as np
 import time
 import json
+import os
 from freeciv_gym.agents.base_agent import BaseAgent
-# from freeciv_gym.agents.controller_agent import ControllerAgent
 from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
+from freeciv_gym.freeciv.utils.language_agent_utility import MOVE_NAMES, INVERSE_MOVE_NAMES
 from freeciv_gym.configs import fc_args
 from agents.civ_autogpt import GPTAgent
 from freeciv_gym.freeciv.utils.language_agent_utility import MOVE_NAMES, INVERSE_MOVE_NAMES
 
+cwd = os.getcwd()
 
 class LanguageAgent(BaseAgent):
-    def __init__(self, LLM_model = 'gpt-3.5-turbo'):
+    def __init__(self, LLM_model = 'gpt-3.5-turbo', load_dialogue = False):
         super().__init__()
         if "debug.agentseed" in fc_args:
             self.set_agent_seed(fc_args["debug.agentseed"])
         self.gpt_agent = GPTAgent(model = LLM_model)
+        if load_dialogue:
+            self.gpt_agent.load_saved_dialogue()
 
     def interact_with_llm_within_time_limit(self, input_prompt, current_ctrl_obj_name, avail_action_list, interact_timeout = 120):
         exec_action_name = None
@@ -103,6 +107,8 @@ class LanguageAgent(BaseAgent):
 
             else:
                 continue
+        local_time = time.localtime()
+        self.gpt_agent.save_dialogue_to_file(os.path.join(cwd, "agents/civ_autogpt/saved_dialogues/" + f"saved_dialogue_for_T{info['turn'] + 1}_at_{local_time.tm_year}_{local_time.tm_mon}_{local_time.tm_mday}.txt"))
         return None
 
     def get_valid_actor_actions(self, actor_dict, info, ctrl_type):
