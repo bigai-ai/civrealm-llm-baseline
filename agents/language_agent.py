@@ -116,22 +116,24 @@ class LanguageAgent(BaseAgent):
             self.planned_actor_ids = []
             self.turn = info['turn']
 
-        actor_id = None
-        actor_name = None
-        avail_actions = None
         for actor in actor_dict:
-            if actor in self.planned_actor_ids:
+            actor_name = actor.split(' ')[0]
+            actor_id = int(actor.split(' ')[1])
+
+            if actor_name != 'Explorer' and actor_id in self.planned_actor_ids:
                 continue
 
-            actor_name, actor_id = actor.split(' ')
-            self.planned_actor_ids.append(actor_id)
-
+            options = info['available_actions'][ctrl_type].get_actions(actor_id, valid_only=True)
+            print('options:', options.keys())
             avail_actions = dict()
-            for action_name in actor_dict[actor_id]['avail_actions']:
-                avail_actions[action_name] = info[ctrl_type][actor_id][action_name]
+            for action_name in actor_dict[actor]['avail_actions']:
+                if action_name in options:
+                    avail_actions[action_name] = options[action_name]
 
-        return actor_id, actor_name, avail_actions
+            self.planned_actor_ids.append(actor_id)
+            return actor_id, actor_name, avail_actions
 
+        return None, None, None
 
     def get_next_valid_actor(self, info, unit_dict, desired_ctrl_type=None):
         """
