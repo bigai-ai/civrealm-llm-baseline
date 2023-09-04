@@ -8,6 +8,7 @@ USAGE:
 (2) Set env varibles.
 
 ```
+# Use AZURE_OPENAI_API_TYPE="azure" to use Azure LLM, otherwise use "openai"
 export AZURE_OPENAI_API_TYPE="<your_open_api_type>"
 export AZURE_OPENAI_API_VERSION='<your_openai_api_version>'
 export AZURE_OPENAI_API_BASE='<your_openai_api_base>'
