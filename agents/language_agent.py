@@ -115,7 +115,7 @@ class LanguageAgent(BaseAgent):
             self.turn = info['turn']
 
         for actor in actor_dict:
-            actor_name = actor.split(' ')[0]
+            actor_name = ' '.join(actor.split(' ')[0: -1])
             actor_id = int(actor.split(' ')[1])
 
             if actor_id in self.planned_actor_ids:
