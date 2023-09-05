@@ -31,7 +31,7 @@ def main():
     done = False
     while not done:
         try:
-            action = agent.act(env, observations, info)
+            action = agent.act(observations, info)
             observations, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
         except Exception as e:

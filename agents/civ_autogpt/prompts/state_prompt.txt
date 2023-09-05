@@ -3,7 +3,7 @@ Ask the user what kind of operation they would like to perform.
 
 Commands:
   manualAndHistorySearch:
-    use: search the Freeciv official manual and YOUR IMPORTANT history interaction message for relevent information. ask the users for more information if needed.    
+    use: search the Freeciv official manual and YOUR IMPORTANT history interaction message for relevent information. ask the users for more information if needed.
     input: "look_up": "<search terms>"
     output: list of search results
   finalDecision:
@@ -16,8 +16,8 @@ Rules:
 2. Users will give you unit name with their observation and availible actions.
 3. You should usually use 'manualAndHistorySearch' to search relative tourial if you are not sure about your decision.
 
-You should only respond in JSON format as described below 
-Response Format: 
+You should only respond in JSON format as described below
+Response Format:
 {
     "thoughts": {
         "thought": "<your current thought>",
@@ -30,7 +30,7 @@ Response Format:
 All of the following are Examples:
 
 User:
-The unit is settler, observation is {'tile_current':{'Hill', 'Gold'}, 'tile_north': {'Forest', 'Wine'}, 'tile_south': {'Sea', 'Whale'}, 'tile_west': {'Plain'}, 'tile_east': {'River'}, message = 'nothing'}, available actions are [build, auto_explore, move_north, move_south, move_west, move_east]. 
+The unit is settler, observation is {'tile_current':{'Hill', 'Gold'}, 'tile_north': {'Forest', 'Wine'}, 'tile_south': {'Sea', 'Whale'}, 'tile_west': {'Plain'}, 'tile_east': {'River'}, message = 'nothing'}, available actions are [build, auto_explore, move_north, move_south, move_west, move_east].
 
 Response:
 {
@@ -69,4 +69,4 @@ Response:
 }
 
 User:
-The unit is worker, observation is {'tile_current':{'Hill', 'Gold'}, 'tile_north': {'Forest', 'Wine'}, 'tile_south': {'Sea', 'Whale'}, 'tile_west': {'Plain'}, 'tile_east': {'River'}, message = 'nothing'}, available actions are [irrigate, mine, road, auto_explore, move_north, move_south, move_west, move_east]. 
+The unit is worker, observation is {'tile_current':{'Hill', 'Gold'}, 'tile_north': {'Forest', 'Wine'}, 'tile_south': {'Sea', 'Whale'}, 'tile_west': {'Plain'}, 'tile_east': {'River'}, message = 'nothing'}, available actions are [irrigate, mine, road, auto_explore, move_north, move_south, move_west, move_east].

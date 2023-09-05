@@ -26,7 +26,7 @@ from agents.civ_autogpt import GPTAgent
 cwd = os.getcwd()
 
 class LanguageAgent(BaseAgent):
-    def __init__(self, LLM_model = 'gpt-3.5-turbo', load_dialogue = False):
+    def __init__(self, LLM_model = 'gpt-35-turbo', load_dialogue = False):
         super().__init__()
         if "debug.agentseed" in fc_args:
             self.set_agent_seed(fc_args["debug.agentseed"])

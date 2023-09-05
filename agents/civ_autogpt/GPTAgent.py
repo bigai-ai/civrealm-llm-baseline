@@ -7,7 +7,7 @@ import requests
 import warnings
 
 from .utils import num_tokens_from_messages, send_message_to_llama, send_message_to_vicuna, extract_json, send_message_to_llama
-from langchain.chat_models import ChatOpenAI
+from langchain.chat_models import ChatOpenAI, AzureChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationSummaryBufferMemory
 
@@ -16,7 +16,7 @@ from langchain.document_loaders import DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Pinecone
-from langchain.llms import OpenAI
+from langchain.llms import OpenAI, AzureOpenAI
 from langchain.chains.question_answering import load_qa_chain
 
 
@@ -52,7 +52,7 @@ class GPTAgent:
     This agent uses GPT-3 to generate actions.
     """
 
-    def __init__(self, model="gpt-3.5-turbo"):
+    def __init__(self, model="gpt-35-turbo"):
         self.model = model
         self.dialogue = []
         self.agent_index = None
@@ -62,12 +62,25 @@ class GPTAgent:
         self.openai_api_keys = self.load_openai_keys()
         self.state_prompt = self._load_state_prompt()
         self.task_prompt = self._load_task_prompt()
-        self.update_key()
 
-        llm = ChatOpenAI(temperature=0.7, openai_api_key=openai.api_key)
+        # For Azure OpenAI API only
+        self.deployment_name = os.environ['DEPLOYMENT_NAME']
+
+        if os.environ['OPENAI_API_TYPE'] == 'azure':
+            self.change_api_base('azure')
+            llm = AzureChatOpenAI(openai_api_base=openai.api_base,
+                                  openai_api_version=openai.api_version,
+                                  openai_api_key=openai.api_key,
+                                  openai_api_type=openai.api_type,
+                                  deployment_name=self.deployment_name,
+                                  temperature=0.7)
+            self.chain = load_qa_chain(AzureOpenAI(deployment_name=self.deployment_name, model_name='gpt-35-turbo'), chain_type="stuff")
+        else:
+            self.change_api_base('openai')
+            llm = ChatOpenAI(temperature=0.7, openai_api_key=openai.api_key)
+            self.chain = load_qa_chain(OpenAI(model_name="gpt-3.5-turbo"), chain_type="stuff")
+
         self.memory = ConversationSummaryBufferMemory(llm=llm, max_token_limit=500)
-
-        self.chain = load_qa_chain(OpenAI(model_name="gpt-3.5-turbo"), chain_type="stuff")
 
         pinecone.init(
             api_key=os.environ["MY_PINECONE_API_KEY"], environment=os.environ["MY_PINECONE_ENV"]
@@ -93,20 +106,20 @@ class GPTAgent:
                 break
             except Exception as e:
                 print(e)
-                self.update_key()
+                self.update_openai_api_key()
         return answer
 
     def change_api_base(self, to_type):
+        openai.api_type = to_type
         if to_type == 'azure':
-            openai.api_type = os.environ["AZURE_OPENAI_API_TYPE"]
-            openai.api_version = os.environ["AZURE_OPENAI_API_VERSION"]
-            openai.api_base = os.environ["AZURE_OPENAI_API_BASE"]
-            openai.api_key = os.environ["AZURE_OPENAI_API_KEY"]
+            openai.api_version = os.environ["OPENAI_API_VERSION"]
+            openai.api_base = os.environ["OPENAI_API_BASE"]
+            openai.api_key = os.environ["OPENAI_API_KEY"]
         else:
-            openai.api_type = "open_ai"
+            assert openai.api_type == "openai"
             openai.api_version = ""
             openai.api_base = 'https://api.openai.com/v1'
-            self.update_key()
+            self.update_openai_api_key()
 
     @staticmethod
     def load_openai_keys():
@@ -136,9 +149,13 @@ class GPTAgent:
     
     def save_dialogue_to_file(self, save_path = saved_dialogue_file):
         with open(save_path, "w", encoding = 'utf-8') as f:
-            f.write(self.dialogue)
+            for message in self.dialogue:
+                f.write(str(message) + '\n')
 
-    def update_key(self):
+    def update_openai_api_key(self):
+        if openai.api_type != 'openai':
+            return
+
         curr_key = self.openai_api_keys[0]
         openai.api_key = os.environ["OPENAI_API_KEY"] = curr_key
         self.openai_api_keys.pop(0)
@@ -265,9 +282,10 @@ class GPTAgent:
     def query(self, stop=None, temperature=0.7, top_p=0.95):
         self.restrict_dialogue()
         # TODO add retreat mech to cope with rate limit
-        self.update_key()
-
+        self.update_openai_api_key()
+        
         if self.model in ['gpt-3.5-turbo-0301', 'gpt-3.5-turbo']:
+            assert openai.api_type == 'openai'
             response = openai.ChatCompletion.create(
                 model=self.model,
                 messages=self.dialogue,
@@ -275,12 +293,12 @@ class GPTAgent:
                 top_p=top_p
             )
         elif self.model in ["gpt-35-turbo", "gpt-35-turbo-16k"]:
-            self.change_api_base('azure')
+            assert openai.api_type == 'azure'
             response = openai.ChatCompletion.create(
-                engine=self.model,
+                deployment_id=self.deployment_name,
+                model=self.model,
                 messages=self.dialogue
             )
-            self.change_api_base('open_ai')
 
         elif self.model in ['vicuna-33B']:
             local_config = {'temperature': temperature, 'top_p': top_p, 'repetition_penalty': 1.1}
@@ -355,7 +373,7 @@ class GPTAgent:
                     break
                 except Exception as e:
                     print(e)
-                    self.update_key()
+                    self.update_openai_api_key()
 
             if user_tag == 1:
                 self.dialogue.append(temp_message)
