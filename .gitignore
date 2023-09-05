@@ -4,3 +4,5 @@ __pycache__/
 *.log
 
 .idea
+agents/civ_autogpt/saved_dialogues/*
+run.sh

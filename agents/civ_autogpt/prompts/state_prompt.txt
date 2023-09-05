@@ -30,7 +30,7 @@ Response Format:
 All of the following are Examples:
 
 User:
-The unit is settler, observation is {'tile_current':{'Hill', 'Gold'}, 'tile_up': {'Forest', 'Wine'}, 'tile_down': {'Sea', 'Whale'}, 'tile_left': {'Plain'}, 'tile_right': {'River'}, message = 'nothing'}, available actions are [build, auto_explore, move_up, move_down, move_left, move_right]. 
+The unit is settler, observation is {'tile_current':{'Hill', 'Gold'}, 'tile_north': {'Forest', 'Wine'}, 'tile_south': {'Sea', 'Whale'}, 'tile_west': {'Plain'}, 'tile_east': {'River'}, message = 'nothing'}, available actions are [build, auto_explore, move_north, move_south, move_west, move_east]. 
 
 Response:
 {
@@ -52,11 +52,11 @@ Response:
         "reasoning": "The user asked to give a guiding operation, and I have got the current game state and manual information, which said I should build city on the plain beside the river. I should based on them to give user an action.",
         "plan": "- identify the command to provide the user with the result\n- execute the command with the appropriate input\n- generate the output and return it to the user"
     },
-    "command": {"name": "finalDecision", "input": {"action": "move_right"}}
+    "command": {"name": "finalDecision", "input": {"action": "move_east"}}
 }
 
 User:
-The unit is settler, observation is {'tile_current': {'River'}, 'tile_up': {'River'}, 'tile_down': {'Sea'}, 'tile_left':{'Hill', 'Gold'}, 'tile_right': {'Plain'}, message = 'nothing'}, available actions are [build, auto_explore, move_up, move_down, move_left, move_right]
+The unit is settler, observation is {'tile_current': {'River'}, 'tile_north': {'River'}, 'tile_south': {'Sea'}, 'tile_west':{'Hill', 'Gold'}, 'tile_east': {'Plain'}, message = 'nothing'}, available actions are [build, auto_explore, move_north, move_south, move_west, move_east]
 
 Response:
 {
@@ -69,4 +69,4 @@ Response:
 }
 
 User:
-The unit is worker, observation is {'tile_current':{'Hill', 'Gold'}, 'tile_up': {'Forest', 'Wine'}, 'tile_down': {'Sea', 'Whale'}, 'tile_left': {'Plain'}, 'tile_right': {'River'}, message = 'nothing'}, available actions are [irrigate, mine, road, auto_explore, move_up, move_down, move_left, move_right]. 
+The unit is worker, observation is {'tile_current':{'Hill', 'Gold'}, 'tile_north': {'Forest', 'Wine'}, 'tile_south': {'Sea', 'Whale'}, 'tile_west': {'Plain'}, 'tile_east': {'River'}, message = 'nothing'}, available actions are [irrigate, mine, road, auto_explore, move_north, move_south, move_west, move_east]. 
