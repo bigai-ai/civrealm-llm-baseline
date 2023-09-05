@@ -47,10 +47,16 @@ class LanguageAgent(BaseAgent):
                 self.gpt_agent.dialogue.pop(-1)
                 print('overtime, randomly choose:', exec_action_name)
                 break
-            response = self.gpt_agent.communicate(input_prompt, parse_choice_tag=False)
-            self.gpt_agent.memory.save_context({'user': input_prompt}, {'assistant': str(response)})
-            exec_action_name = self.gpt_agent.process_command(
-                response, input_prompt, current_ctrl_obj_name, avail_action_list)
+            try:
+                response = self.gpt_agent.communicate(input_prompt, parse_choice_tag=False)
+                self.gpt_agent.memory.save_context({'user': input_prompt}, {'assistant': str(response)})
+                exec_action_name = self.gpt_agent.process_command(
+                    response, input_prompt, current_ctrl_obj_name, avail_action_list)
+            except Exception as e:
+                fc_logger.error('Error in interact_with_llm_within_time_limit')
+                fc_logger.error(repr(e))
+                fc_logger.error('input_prompt: ' + input_prompt)
+                continue
         return exec_action_name
 
     def act(self, observations, info):
