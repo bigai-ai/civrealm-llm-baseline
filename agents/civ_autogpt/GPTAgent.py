@@ -74,7 +74,8 @@ class GPTAgent:
                                   openai_api_type=openai.api_type,
                                   deployment_name=self.deployment_name,
                                   temperature=0.7)
-            self.chain = load_qa_chain(AzureOpenAI(deployment_name=self.deployment_name, model_name='gpt-35-turbo'), chain_type="stuff")
+            self.chain = load_qa_chain(AzureOpenAI(deployment_name=self.deployment_name,
+                                       model_name='gpt-35-turbo'), chain_type="stuff")
         else:
             self.change_api_base('openai')
             llm = ChatOpenAI(temperature=0.7, openai_api_key=openai.api_key)
@@ -105,6 +106,8 @@ class GPTAgent:
                 answer = self.chain.run(input_documents=similar_docs, question=query)
                 break
             except Exception as e:
+                print('similiar_docs:', similar_docs)
+                print('query:', query)
                 print(e)
                 self.update_openai_api_key()
         return answer
@@ -141,14 +144,14 @@ class GPTAgent:
         with open(task_prompt_file, "r") as f:
             self.task_prompt = f.read()
         self.dialogue.append({"role": "user", "content": self.task_prompt})
-    
-    def load_saved_dialogue(self, load_path = saved_dialogue_file):
+
+    def load_saved_dialogue(self, load_path=saved_dialogue_file):
         # print("reading task prompt from {}".format(task_prompt_file))
         with open(load_path, "r") as f:
             self.dialogue = eval(f.read())
-    
-    def save_dialogue_to_file(self, save_path = saved_dialogue_file):
-        with open(save_path, "w", encoding = 'utf-8') as f:
+
+    def save_dialogue_to_file(self, save_path=saved_dialogue_file):
+        with open(save_path, "w", encoding='utf-8') as f:
             for message in self.dialogue:
                 f.write(str(message) + '\n')
 
@@ -250,7 +253,7 @@ class GPTAgent:
 
             if self.check_if_the_taken_actions_list_needed_update('look_up', 3, 0):
                 answer = 'Too many look for! Now You should give me an action at once!'
-                print(answer)
+                print('answer:', answer)
                 self.dialogue.append({'role': 'user', 'content': answer})
                 self.taken_actions_list = []
             else:
@@ -263,8 +266,8 @@ class GPTAgent:
                 else:
                     self.dialogue.append({'role': 'user', 'content': answer})
 
-            self.memory.save_context({'assistant': query}, {'user': answer})
-            self.taken_actions_list.append('look_up')
+                self.memory.save_context({'assistant': query}, {'user': answer})
+                self.taken_actions_list.append('look_up')
 
             return None
         else:
@@ -283,7 +286,7 @@ class GPTAgent:
         self.restrict_dialogue()
         # TODO add retreat mech to cope with rate limit
         self.update_openai_api_key()
-        
+
         if self.model in ['gpt-3.5-turbo-0301', 'gpt-3.5-turbo']:
             assert openai.api_type == 'openai'
             response = openai.ChatCompletion.create(
@@ -404,6 +407,7 @@ class GPTAgent:
                 break
 
             except Exception as e:
+                print('dialogue:', self.dialogue)
                 print(e)
                 print("retrying...")
                 # self.dialogue.pop(-1)
