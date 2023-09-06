@@ -138,14 +138,12 @@ class GPTAgent:
         return context.split('\n')
 
     def _load_state_prompt(self):
-        with open(state_prompt_file, "r") as f:
-            state_prompt = f.read()
+        state_prompt = self.prompt_handler.state_prompt()
         self.add_user_message_to_dialogue(state_prompt)
         return state_prompt
 
     def _load_task_prompt(self):
-        with open(task_prompt_file, "r") as f:
-            task_prompt = f.read()
+        task_prompt = self.prompt_handler.task_prompt()
         self.add_user_message_to_dialogue(task_prompt)
         return task_prompt
 
