@@ -52,10 +52,9 @@ class GPTAgent:
     This agent uses GPT-3 to generate actions.
     """
 
-    def __init__(self, model="gpt-35-turbo"):
+    def __init__(self, model):
         self.model = model
         self.dialogue = []
-        self.agent_index = None
         self.taken_actions_list = []
         self.message = ''
 
@@ -90,6 +89,9 @@ class GPTAgent:
         # embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
         self.index = Pinecone.from_existing_index(
             index_name='langchain-demo', embedding=OpenAIEmbeddings(model="text-embedding-ada-002"))
+        
+    def add_user_message_to_dialogue(self, message):
+        self.dialogue.append({'role': 'user', 'content': message})
 
     def get_similiar_docs(self, query, k=2, score=False):
         index = self.index
@@ -131,19 +133,16 @@ class GPTAgent:
         return context.split('\n')
 
     def _load_state_prompt(self):
-
         with open(state_prompt_file, "r") as f:
-            self.state_prompt = f.read()
-
-        self.dialogue.append({"role": "user", "content": self.state_prompt})
-
-        return self.state_prompt
+            state_prompt = f.read()
+        self.add_user_message_to_dialogue(state_prompt)
+        return state_prompt
 
     def _load_task_prompt(self):
-        # print("reading task prompt from {}".format(task_prompt_file))
         with open(task_prompt_file, "r") as f:
-            self.task_prompt = f.read()
-        self.dialogue.append({"role": "user", "content": self.task_prompt})
+            task_prompt = f.read()
+        self.add_user_message_to_dialogue(task_prompt)
+        return task_prompt
 
     def load_saved_dialogue(self, load_path=saved_dialogue_file):
         # print("reading task prompt from {}".format(task_prompt_file))
@@ -418,7 +417,6 @@ class GPTAgent:
     def reset(self):
         # super().reset()
         self.dialogue = []
-        self.agent_index = None
         self.message = ''
         self.taken_actions_list = []
         # self.gpt_extractor.reset()
