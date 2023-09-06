@@ -18,17 +18,16 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Pinecone
 from langchain.llms import OpenAI, AzureOpenAI
 from langchain.chains.question_answering import load_qa_chain
-
+from agents.prompt_handlers.base_prompt_handler import BasePromptHandler
 
 warnings.filterwarnings('ignore')
 
-
 cwd = os.getcwd()
 openai_keys_file = os.path.join(cwd, "agents/civ_autogpt/openai_keys.txt")
-saved_dialogue_file = os.path.join(cwd, "agents/civ_autogpt/saved_dialogues/saved_dialogue.txt")
-task_prompt_file = os.path.join(cwd, "agents/civ_autogpt/prompts/task_prompt.txt")
-state_prompt_file = os.path.join(cwd, "agents/civ_autogpt/prompts/state_prompt.txt")
-
+saved_dialogue_file = os.path.join(
+    cwd, "agents/civ_autogpt/saved_dialogues/saved_dialogue.txt")
+task_prompt_file = os.path.join(cwd,
+                                "agents/civ_autogpt/prompts/task_prompt.txt")
 
 TOKEN_LIMIT_TABLE = {
     "gpt-4": 8192,
@@ -45,6 +44,7 @@ TOKEN_LIMIT_TABLE = {
     "Llama2-70B-chat": 2048,
     "gpt-35-turbo-16k": 16384
 }
+BASE_PH = BasePromptHandler()
 
 
 class GPTAgent:
@@ -52,13 +52,14 @@ class GPTAgent:
     This agent uses GPT-3 to generate actions.
     """
 
-    def __init__(self, model):
+    def __init__(self, model, prompt_handler=BASE_PH):
         self.model = model
         self.dialogue = []
         self.taken_actions_list = []
         self.message = ''
 
         self.openai_api_keys = self.load_openai_keys()
+        self.prompt_handler = prompt_handler
         self.state_prompt = self._load_state_prompt()
         self.task_prompt = self._load_task_prompt()
 
@@ -73,23 +74,26 @@ class GPTAgent:
                                   openai_api_type=openai.api_type,
                                   deployment_name=self.deployment_name,
                                   temperature=0.7)
-            self.chain = load_qa_chain(AzureOpenAI(deployment_name=self.deployment_name,
-                                       model_name='gpt-35-turbo'), chain_type="stuff")
+            self.chain = load_qa_chain(AzureOpenAI(
+                deployment_name=self.deployment_name,
+                model_name='gpt-35-turbo'),
+                                       chain_type="stuff")
         else:
             self.change_api_base('openai')
             llm = ChatOpenAI(temperature=0.7, openai_api_key=openai.api_key)
-            self.chain = load_qa_chain(OpenAI(model_name="gpt-3.5-turbo"), chain_type="stuff")
+            self.chain = load_qa_chain(OpenAI(model_name="gpt-3.5-turbo"),
+                                       chain_type="stuff")
 
-        self.memory = ConversationSummaryBufferMemory(llm=llm, max_token_limit=500)
+        self.memory = ConversationSummaryBufferMemory(llm=llm,
+                                                      max_token_limit=500)
 
-        pinecone.init(
-            api_key=os.environ["MY_PINECONE_API_KEY"], environment=os.environ["MY_PINECONE_ENV"]
-        )
+        pinecone.init(api_key=os.environ["MY_PINECONE_API_KEY"],
+                      environment=os.environ["MY_PINECONE_ENV"])
 
         # embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
         self.index = Pinecone.from_existing_index(
             index_name='langchain-demo', embedding=OpenAIEmbeddings(model="text-embedding-ada-002"))
-        
+
     def add_user_message_to_dialogue(self, message):
         self.dialogue.append({'role': 'user', 'content': message})
 
@@ -105,7 +109,8 @@ class GPTAgent:
         similar_docs = self.get_similiar_docs(query)
         while True:
             try:
-                answer = self.chain.run(input_documents=similar_docs, question=query)
+                answer = self.chain.run(input_documents=similar_docs,
+                                        question=query)
                 break
             except Exception as e:
                 print('similiar_docs:', similar_docs)
@@ -163,7 +168,10 @@ class GPTAgent:
         self.openai_api_keys.pop(0)
         self.openai_api_keys.append(curr_key)
 
-    def check_if_the_taken_actions_list_needed_update(self, check_content, check_num=3, top_k_charactors=0):
+    def check_if_the_taken_actions_list_needed_update(self,
+                                                      check_content,
+                                                      check_num=3,
+                                                      top_k_charactors=0):
         if top_k_charactors == 0:
             if len(self.taken_actions_list) >= check_num:
                 for i in range(check_num):
@@ -179,7 +187,8 @@ class GPTAgent:
         else:
             if len(self.taken_actions_list) >= check_num:
                 for i in range(check_num):
-                    if self.taken_actions_list[-1 - i][:top_k_charactors] == check_content:
+                    if self.taken_actions_list[
+                            -1 - i][:top_k_charactors] == check_content:
                         if i == check_num - 1:
                             return True
                         else:
@@ -189,7 +198,8 @@ class GPTAgent:
 
             return False
 
-    def process_command(self, command_json, obs_input_prompt, current_unit_name, current_avail_actions):
+    def process_command(self, command_json, obs_input_prompt,
+                        current_unit_name, current_avail_actions):
         '''
         manualAndHistorySearch
         askCurrentGameInformation
@@ -202,9 +212,9 @@ class GPTAgent:
             print(e)
             print('Not in given json format, retrying...')
             if random.random() > 0.5:
-                self.update_dialogue(
-                    obs_input_prompt + ' CAUTION: You should strictly follow the JSON format as described above!',
-                    pop_num=2)
+                self.update_dialogue(obs_input_prompt +
+                                     self.prompt_handler.insist_json(),
+                                     pop_num=2)
                 return None
             else:
                 self.update_dialogue(obs_input_prompt, pop_num=2)
@@ -219,7 +229,8 @@ class GPTAgent:
                 # Here is the most time taking place.
                 if random.random() > 0.5:
                     self.update_dialogue(
-                        obs_input_prompt + ' CAUTION: You can only answer action from the available action list!',
+                        obs_input_prompt +
+                        self.prompt_handler.insist_avail_action(),
                         pop_num=2)
                     return None
                 else:
@@ -229,11 +240,13 @@ class GPTAgent:
             else:
                 self.taken_actions_list.append(command_input['action'])
                 if self.check_if_the_taken_actions_list_needed_update(
-                        'goto', 15, 4) or self.check_if_the_taken_actions_list_needed_update(
+                        'goto', 15, 4
+                ) or self.check_if_the_taken_actions_list_needed_update(
                         'keep_activity', 15, 0):
                     self.update_dialogue(
                         obs_input_prompt +
-                        ' CAUTION: You have chosen too much goto operation. You should try various kind of action. Try to look for more information in manual!',
+                        self.prompt_handler.insist_various_actions(
+                            action="goto"),
                         pop_num=2)
                     # command_input = new_response['command']['input']
                     self.taken_actions_list = []
@@ -242,16 +255,19 @@ class GPTAgent:
                     print('exec_action:', exec_action)
                     return exec_action
 
-        elif command_name == 'askCurrentGameInformation' and command_input['query']:
+        elif command_name == 'askCurrentGameInformation' and command_input[
+                'query']:
             print(command_input)
             self.taken_actions_list.append('askCurrentGameInformation')
             return None
 
-        elif command_name == 'manualAndHistorySearch' and command_input['look_up']:
+        elif command_name == 'manualAndHistorySearch' and command_input[
+                'look_up']:
             print(command_input)
 
-            if self.check_if_the_taken_actions_list_needed_update('look_up', 3, 0):
-                answer = 'Too many look for! Now You should give me an action at once!'
+            if self.check_if_the_taken_actions_list_needed_update(
+                    'look_up', 3, 0):
+                answer = self.prompt_handler.generate("finish_look_for")
                 print('answer:', answer)
                 self.dialogue.append({'role': 'user', 'content': answer})
                 self.taken_actions_list = []
@@ -260,12 +276,17 @@ class GPTAgent:
                 answer = self.get_answer(query)
                 print('answer:', answer)
                 if random.random() > 0.5:
-                    self.dialogue.append(
-                        {'role': 'user', 'content': answer + ' Now you get the needed information from the manual, give me your action answer.'})
+                    self.dialogue.append({
+                        'role':
+                        'user',
+                        'content':
+                        answer + self.prompt_handler.finish_look_for(),
+                    })
                 else:
                     self.dialogue.append({'role': 'user', 'content': answer})
 
-                self.memory.save_context({'assistant': query}, {'user': answer})
+                self.memory.save_context({'assistant': query},
+                                         {'user': answer})
                 self.taken_actions_list.append('look_up')
 
             return None
@@ -276,7 +297,12 @@ class GPTAgent:
             if random.random() < 0.8:
                 self.dialogue.pop(-1)
             else:
-                self.dialogue.append({'role': 'user', 'content': 'You should only use the given commands!'})
+                self.dialogue.append({
+                    'role':
+                    'user',
+                    'content':
+                    'You should only use the given commands!'
+                })
             # self.update_dialogue(obs_input_prompt, pop_num = 1)
 
             return None
@@ -288,38 +314,41 @@ class GPTAgent:
 
         if self.model in ['gpt-3.5-turbo-0301', 'gpt-3.5-turbo']:
             assert openai.api_type == 'openai'
-            response = openai.ChatCompletion.create(
-                model=self.model,
-                messages=self.dialogue,
-                temperature=temperature,
-                top_p=top_p
-            )
+            response = openai.ChatCompletion.create(model=self.model,
+                                                    messages=self.dialogue,
+                                                    temperature=temperature,
+                                                    top_p=top_p)
         elif self.model in ["gpt-35-turbo", "gpt-35-turbo-16k"]:
             assert openai.api_type == 'azure'
             response = openai.ChatCompletion.create(
                 deployment_id=self.deployment_name,
                 model=self.model,
-                messages=self.dialogue
-            )
+                messages=self.dialogue)
 
         elif self.model in ['vicuna-33B']:
-            local_config = {'temperature': temperature, 'top_p': top_p, 'repetition_penalty': 1.1}
+            local_config = {
+                'temperature': temperature,
+                'top_p': top_p,
+                'repetition_penalty': 1.1
+            }
             response = send_message_to_vicuna(self.dialogue, local_config)
 
         elif self.model in ['Llama2-70B-chat']:
-            local_config = {'temperature': temperature, 'top_p': top_p, 'repetition_penalty': 1.1}
+            local_config = {
+                'temperature': temperature,
+                'top_p': top_p,
+                'repetition_penalty': 1.1
+            }
             response = send_message_to_llama(self.dialogue, local_config)
 
         else:
-            response = openai.Completion.create(
-                model=self.model,
-                prompt=str(self.dialogue),
-                max_tokens=1024,
-                stop=stop,
-                temperature=temperature,
-                n=1,
-                top_p=top_p
-            )
+            response = openai.Completion.create(model=self.model,
+                                                prompt=str(self.dialogue),
+                                                max_tokens=1024,
+                                                stop=stop,
+                                                temperature=temperature,
+                                                n=1,
+                                                top_p=top_p)
 
         return response
 
@@ -332,12 +361,17 @@ class GPTAgent:
 
     # @staticmethod
     def parse_response(self, response):
-        if self.model in ['gpt-3.5-turbo-0301', 'gpt-3.5-turbo', 'gpt-4', 'gpt-4-0314']:
+        if self.model in [
+                'gpt-3.5-turbo-0301', 'gpt-3.5-turbo', 'gpt-4', 'gpt-4-0314'
+        ]:
             return dict(response["choices"][0]["message"])
 
         elif self.model in ["gpt-35-turbo", "gpt-35-turbo-16k"]:
             try:
-                ans = json.dumps(eval(extract_json(response['choices'][0]['message']['content'])))
+                ans = json.dumps(
+                    eval(
+                        extract_json(
+                            response['choices'][0]['message']['content'])))
             except:
                 return response["choices"][0]["message"]
             return {'role': 'assistant', 'content': ans}
@@ -348,11 +382,13 @@ class GPTAgent:
         else:
             # self.model in ['text-davinci-003', 'code-davinci-002']
 
-            return {'role': 'assistant', 'content': response["choices"][0]["text"][2:]}
+            return {
+                'role': 'assistant',
+                'content': response["choices"][0]["text"][2:]
+            }
 
     def restrict_dialogue(self):
         limit = TOKEN_LIMIT_TABLE[self.model]
-
         """
         The limit on token length for gpt-3.5-turbo-0301 is 4096.
         If token length exceeds the limit, we will remove the oldest messages.
@@ -370,8 +406,13 @@ class GPTAgent:
 
             while True:
                 try:
-                    self.dialogue.append(
-                        {'role': 'user', 'content': 'The former chat history can be summarized as: \n' + self.memory.load_memory_variables({})['history']})
+                    self.dialogue.append({
+                        'role':
+                        'user',
+                        'content':
+                        'The former chat history can be summarized as: \n' +
+                        self.memory.load_memory_variables({})['history']
+                    })
                     break
                 except Exception as e:
                     print(e)
@@ -398,8 +439,12 @@ class GPTAgent:
                 except Exception as e:
                     # self.dialogue.pop(-1)
                     print(e)
-                    self.dialogue.append({"role": "user",
-                                          "content": "You should only respond in JSON format as described"})
+                    self.dialogue.append({
+                        "role":
+                        "user",
+                        "content":
+                        "You should only respond in JSON format as described"
+                    })
                     print('Not response json, retrying...')
 
                     continue

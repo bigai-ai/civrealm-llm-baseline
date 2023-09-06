@@ -22,21 +22,31 @@ from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
 from freeciv_gym.freeciv.utils.language_agent_utility import MOVE_NAMES, INVERSE_MOVE_NAMES
 from freeciv_gym.configs import fc_args
 from agents.civ_autogpt import GPTAgent
+from agents.prompt_handlers.base_prompt_handler import BasePromptHandler
 
 cwd = os.getcwd()
+BASE_PH = BasePromptHandler()
 
 
 class LanguageAgent(BaseAgent):
-    def __init__(self, LLM_model='gpt-35-turbo', load_dialogue=False):
+    def __init__(self,
+                 LLM_model='gpt-35-turbo',
+                 load_dialogue=False,
+                 prompt_handler: BasePromptHandler = BASE_PH):
         super().__init__()
+        self.prompt_handler = prompt_handler
         if "debug.agentseed" in fc_args:
             self.set_agent_seed(fc_args["debug.agentseed"])
-        self.gpt_agent = GPTAgent(model=LLM_model)
+        self.gpt_agent = GPTAgent(model=LLM_model,
+                                  prompt_handler=self.prompt_handler)
         if load_dialogue:
             self.gpt_agent.load_saved_dialogue()
 
-    def interact_with_llm_within_time_limit(
-            self, input_prompt, current_ctrl_obj_name, avail_action_list, interact_timeout=120):
+    def interact_with_llm_within_time_limit(self,
+                                            input_prompt,
+                                            current_ctrl_obj_name,
+                                            avail_action_list,
+                                            interact_timeout=120):
         exec_action_name = None
         start_time = time.time()
         while exec_action_name is None:
@@ -48,10 +58,13 @@ class LanguageAgent(BaseAgent):
                 print('overtime, randomly choose:', exec_action_name)
                 break
             try:
-                response = self.gpt_agent.communicate(input_prompt, parse_choice_tag=False)
-                self.gpt_agent.memory.save_context({'user': input_prompt}, {'assistant': str(response)})
+                response = self.gpt_agent.communicate(input_prompt,
+                                                      parse_choice_tag=False)
+                self.gpt_agent.memory.save_context(
+                    {'user': input_prompt}, {'assistant': str(response)})
                 exec_action_name = self.gpt_agent.process_command(
-                    response, input_prompt, current_ctrl_obj_name, avail_action_list)
+                    response, input_prompt, current_ctrl_obj_name,
+                    avail_action_list)
             except Exception as e:
                 fc_logger.error('Error in interact_with_llm_within_time_limit')
                 fc_logger.error(repr(e))
@@ -76,15 +89,19 @@ class LanguageAgent(BaseAgent):
                 current_unit_obs = info['llm_info'][ctrl_type][valid_actor_id]
                 fc_logger.debug(f'current unit obs: {current_unit_obs}')
 
-                current_avail_actions_list = [MOVE_NAMES[action_name]
-                                              if action_name in MOVE_NAMES.keys() else action_name
-                                              for action_name in valid_action_list]
+                current_avail_actions_list = [
+                    MOVE_NAMES[action_name]
+                    if action_name in MOVE_NAMES.keys() else action_name
+                    for action_name in valid_action_list
+                ]
 
                 obs_input_prompt = f"""The unit is {current_unit_name}, observation is {current_unit_obs}. Your available action list is {current_avail_actions_list}. """
-                print('current unit:', current_unit_name, '; unit id:', valid_actor_id)
+                print('current unit:', current_unit_name, '; unit id:',
+                      valid_actor_id)
 
                 exec_action_name = self.interact_with_llm_within_time_limit(
-                    obs_input_prompt, current_unit_name, current_avail_actions_list)
+                    obs_input_prompt, current_unit_name,
+                    current_avail_actions_list)
 
                 try:
                     exec_action_name = INVERSE_MOVE_NAMES[exec_action_name]
@@ -109,10 +126,12 @@ class LanguageAgent(BaseAgent):
                 current_avail_actions_list = valid_action_list
 
                 obs_input_prompt = f"""The city is {current_city_name}, observation is {current_city_obs}. Your available action list is {current_avail_actions_list}. """
-                print('current city:', current_city_name, '; city id:', valid_actor_id)
+                print('current city:', current_city_name, '; city id:',
+                      valid_actor_id)
 
                 exec_action_name = self.interact_with_llm_within_time_limit(
-                    obs_input_prompt, current_city_name, current_avail_actions_list)
+                    obs_input_prompt, current_city_name,
+                    current_avail_actions_list)
 
                 if exec_action_name:
                     return (ctrl_type, valid_actor_id, exec_action_name)
@@ -124,7 +143,8 @@ class LanguageAgent(BaseAgent):
         self.gpt_agent.save_dialogue_to_file(
             os.path.join(
                 cwd, "agents/civ_autogpt/saved_dialogues/" +
-                f"saved_dialogue_for_T{info['turn'] + 1}_at_{local_time.tm_year}_{local_time.tm_mon}_{local_time.tm_mday}.txt"))
+                f"saved_dialogue_for_T{info['turn'] + 1}_at_{local_time.tm_year}_{local_time.tm_mon}_{local_time.tm_mday}.txt"
+            ))
         return None
 
     def get_valid_actor_actions(self, actor_dict, info, ctrl_type):
@@ -133,7 +153,7 @@ class LanguageAgent(BaseAgent):
             self.turn = info['turn']
 
         for actor in actor_dict:
-            actor_name = ' '.join(actor.split(' ')[0: -1])
+            actor_name = ' '.join(actor.split(' ')[0:-1])
             actor_id = int(actor.split(' ')[1])
 
             if actor_id in self.planned_actor_ids:
