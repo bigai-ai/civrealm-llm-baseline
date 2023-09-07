@@ -34,9 +34,12 @@ class LanguageAgent(BaseAgent):
                  load_dialogue=False,
                  prompt_handler: BasePromptHandler = BASE_PH):
         super().__init__()
+
+        self.turn = 0
         self.prompt_handler = prompt_handler
         if "debug.agentseed" in fc_args:
             self.set_agent_seed(fc_args["debug.agentseed"])
+
         self.gpt_agent = GPTAgent(model=LLM_model,
                                   prompt_handler=self.prompt_handler)
         if load_dialogue:
@@ -75,7 +78,6 @@ class LanguageAgent(BaseAgent):
     def act(self, observations, info):
         available_actions = info['available_actions']
         for ctrl_type in available_actions.keys():
-
             if ctrl_type == 'unit':
                 unit_dict = info['llm_info'][ctrl_type]['unit_dict']
                 fc_logger.debug(f'unit_dict: {unit_dict}')

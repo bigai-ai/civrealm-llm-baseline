@@ -6,6 +6,7 @@ import json
 import requests
 import warnings
 
+from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
 from .utils import num_tokens_from_messages, send_message_to_llama, send_message_to_vicuna, extract_json, send_message_to_llama
 from langchain.chat_models import ChatOpenAI, AzureChatOpenAI
 from langchain.chains import ConversationChain
@@ -201,6 +202,7 @@ class GPTAgent:
         askCurrentGameInformation
         finalDecision
         '''
+        fc_logger.debug(f'Processing command: {command_json}')
         try:
             command_input = command_json['command']['input']
             command_name = command_json['command']['name']
@@ -298,6 +300,8 @@ class GPTAgent:
         # TODO add retreat mech to cope with rate limit
         self.update_openai_api_key()
 
+        fc_logger.debug(f'Querying with dialogue: {self.dialogue}')
+
         if self.model in ['gpt-3.5-turbo-0301', 'gpt-3.5-turbo']:
             assert openai.api_type == 'openai'
             response = openai.ChatCompletion.create(model=self.model,
@@ -345,19 +349,15 @@ class GPTAgent:
 
         return self.communicate(chat_content)
 
-    # @staticmethod
     def parse_response(self, response):
-        if self.model in [
-                'gpt-3.5-turbo-0301', 'gpt-3.5-turbo', 'gpt-4', 'gpt-4-0314'
-        ]:
+        fc_logger.debug(f'Parsing response: {response}')
+
+        if self.model in ['gpt-3.5-turbo-0301', 'gpt-3.5-turbo', 'gpt-4', 'gpt-4-0314']:
             return dict(response["choices"][0]["message"])
 
         elif self.model in ["gpt-35-turbo", "gpt-35-turbo-16k"]:
             try:
-                ans = json.dumps(
-                    eval(
-                        extract_json(
-                            response['choices'][0]['message']['content'])))
+                ans = extract_json(response['choices'][0]['message']['content'])
             except:
                 return response["choices"][0]["message"]
             return {'role': 'assistant', 'content': ans}
@@ -367,7 +367,6 @@ class GPTAgent:
 
         else:
             # self.model in ['text-davinci-003', 'code-davinci-002']
-
             return {
                 'role': 'assistant',
                 'content': response["choices"][0]["text"][2:]
@@ -380,7 +379,7 @@ class GPTAgent:
         If token length exceeds the limit, we will remove the oldest messages.
         """
         # TODO validate that the messages removed are obs and actions
-        while num_tokens_from_messages(self.dialogue) >= limit:
+        while num_tokens_from_messages(self.dialogue, self.model) >= limit:
             temp_message = {}
             user_tag = 0
             if self.dialogue[-1]['role'] == 'user':
@@ -424,11 +423,10 @@ class GPTAgent:
                 break
 
             except Exception as e:
-                print('dialogue:', self.dialogue)
+                fc_logger.debug('Error in communicate: ' + str(e))
+                fc_logger.debug('content: ' + content)
                 print(e)
                 print("retrying...")
-                # self.dialogue.pop(-1)
-                # self.dialogue.pop(-1)
                 continue
         return response
 

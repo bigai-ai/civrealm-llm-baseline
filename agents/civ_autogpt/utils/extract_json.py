@@ -1,6 +1,20 @@
 import json
 
+
 def extract_json(text):
+    start_index = text.find("{")
+    end_index = text.rfind("}") + 1
+    json_string = text[start_index:end_index]
+    
+    try:
+        json_data = json.loads(json_string)
+    except json.JSONDecodeError:
+        return text
+
+    return json.dumps(json_data)
+
+
+def deprecated_extract_json(text):
     # find json
     start_index = text.find("{")
     end_index = text.rfind("}") + 1
