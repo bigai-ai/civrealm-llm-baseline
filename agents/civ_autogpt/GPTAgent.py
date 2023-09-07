@@ -44,7 +44,6 @@ TOKEN_LIMIT_TABLE = {
     "Llama2-70B-chat": 2048,
     "gpt-35-turbo-16k": 16384
 }
-BASE_PH = BasePromptHandler()
 
 
 class GPTAgent:
@@ -52,7 +51,7 @@ class GPTAgent:
     This agent uses GPT-3 to generate actions.
     """
 
-    def __init__(self, model, prompt_handler=BASE_PH):
+    def __init__(self, model, prompt_handler: BasePromptHandler):
         self.model = model
         self.dialogue = []
         self.taken_actions_list = []
@@ -76,8 +75,8 @@ class GPTAgent:
                                   temperature=0.7)
             self.chain = load_qa_chain(AzureOpenAI(
                 deployment_name=self.deployment_name,
-                model_name='gpt-35-turbo'),
-                                       chain_type="stuff")
+                model_name=self.model),
+                chain_type="stuff")
         else:
             self.change_api_base('openai')
             llm = ChatOpenAI(temperature=0.7, openai_api_key=openai.api_key)
@@ -90,7 +89,6 @@ class GPTAgent:
         pinecone.init(api_key=os.environ["MY_PINECONE_API_KEY"],
                       environment=os.environ["MY_PINECONE_ENV"])
 
-        # embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
         self.index = Pinecone.from_existing_index(
             index_name='langchain-demo', embedding=OpenAIEmbeddings(model="text-embedding-ada-002"))
 
@@ -267,21 +265,16 @@ class GPTAgent:
                     'look_up', 3, 0):
                 answer = self.prompt_handler.generate("finish_look_for")
                 print('answer:', answer)
-                self.dialogue.append({'role': 'user', 'content': answer})
+                self.add_user_message_to_dialogue(answer)
                 self.taken_actions_list = []
             else:
                 query = command_input['look_up']
                 answer = self.get_answer(query)
                 print('answer:', answer)
                 if random.random() > 0.5:
-                    self.dialogue.append({
-                        'role':
-                        'user',
-                        'content':
-                        answer + self.prompt_handler.finish_look_for(),
-                    })
+                    self.add_user_message_to_dialogue(answer + self.prompt_handler.finish_look_for())
                 else:
-                    self.dialogue.append({'role': 'user', 'content': answer})
+                    self.add_user_message_to_dialogue(answer)
 
                 self.memory.save_context({'assistant': query},
                                          {'user': answer})
@@ -295,12 +288,7 @@ class GPTAgent:
             if random.random() < 0.8:
                 self.dialogue.pop(-1)
             else:
-                self.dialogue.append({
-                    'role':
-                    'user',
-                    'content':
-                    'You should only use the given commands!'
-                })
+                self.add_user_message_to_dialogue('You should only use the given commands!')
             # self.update_dialogue(obs_input_prompt, pop_num = 1)
 
             return None
@@ -404,13 +392,8 @@ class GPTAgent:
 
             while True:
                 try:
-                    self.dialogue.append({
-                        'role':
-                        'user',
-                        'content':
-                        'The former chat history can be summarized as: \n' +
-                        self.memory.load_memory_variables({})['history']
-                    })
+                    self.add_user_message_to_dialogue(
+                        'The former chat history can be summarized as: \n' + self.memory.load_memory_variables({})['history'])
                     break
                 except Exception as e:
                     print(e)
@@ -421,7 +404,7 @@ class GPTAgent:
                 user_tag = 0
 
     def communicate(self, content, parse_choice_tag=False):
-        self.dialogue.append({"role": "user", "content": content})
+        self.add_user_message_to_dialogue(content)
         while True:
             try:
                 raw_response = self.query()
@@ -429,20 +412,12 @@ class GPTAgent:
                 self.dialogue.append(self.message)
 
                 response = self.message["content"]
-
-                # print('response:', response)
-
                 try:
                     response = json.loads(response)
                 except Exception as e:
                     # self.dialogue.pop(-1)
                     print(e)
-                    self.dialogue.append({
-                        "role":
-                        "user",
-                        "content":
-                        "You should only respond in JSON format as described"
-                    })
+                    self.add_user_message_to_dialogue('You should only respond in JSON format as described')
                     print('Not response json, retrying...')
 
                     continue
