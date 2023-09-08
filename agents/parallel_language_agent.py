@@ -30,7 +30,7 @@ class ParallelLanguageAgent(LanguageAgent):
     def remove_entity(self, entity_type, entity_id):
         pass
 
-    def process_observations(self, observations, info):
+    def process_observations_and_info(self, observations, info):
         pass
 
     def make_decisions(self):

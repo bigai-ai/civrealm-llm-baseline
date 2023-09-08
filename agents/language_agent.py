@@ -22,12 +22,13 @@ from freeciv_gym.agents.base_agent import BaseAgent
 
 
 class LanguageAgent(BaseAgent):
-    def __init__(self, manager_type: str = 'parallel'):
+    def __init__(self, llm_model: str):
         super().__init__()
         self.is_new_turn = False
         self.entities = {'unit': set(), 'city': set()}
-        self.workers = self.initialize_workers()
+        self.workers = self.initialize_workers(llm_model)
         self.processed_observations = None
+        self.processed_info = None
         self.chosen_actions = Queue()
 
     @abstractmethod
@@ -43,7 +44,7 @@ class LanguageAgent(BaseAgent):
         pass
 
     @abstractmethod
-    def process_observations(self, observations, info):
+    def process_observations_and_info(self, observations, info):
         pass
 
     @abstractmethod
@@ -84,10 +85,18 @@ class LanguageAgent(BaseAgent):
         self.handle_dead_entities(death_entities)
 
         self.chosen_actions = Queue()
-        self.process_observations(observations, info)
+        self.process_observations_and_info(observations, info)
         self.make_decisions()
 
         self.is_new_turn = False
+
+    def is_action_valid(self, info, action):
+        ctrl_type, actor_id, action_name = action
+        action_dict = info['available_actions'][ctrl_type]
+        if action_name in action_dict[actor_id]:
+            return action_dict[actor_id][action_name]
+        else:
+            return False
 
     def act(self, observations, info):
         self.check_is_new_turn(info)
@@ -95,6 +104,9 @@ class LanguageAgent(BaseAgent):
             self.handle_new_turn(observations, info)
 
         if not self.chosen_actions.empty():
-            return self.chosen_actions.get()
+            action = self.chosen_actions.get()
+            while not self.is_action_valid(info, action):
+                action = self.chosen_actions.get()
+            return action
         else:
             return None

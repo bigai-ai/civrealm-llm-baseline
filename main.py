@@ -16,7 +16,7 @@
 import warnings
 import gymnasium
 import freeciv_gym
-from agents import BaselineLanguageAgent, ParallelLanguageAgent
+from agents import BaselineLanguageAgent, AutoGPTAgent
 from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
 from freeciv_gym.configs import fc_args
 
@@ -26,7 +26,7 @@ warnings.filterwarnings('ignore', message='.*The obs returned by the .* method.*
 
 def main():
     env = gymnasium.make('freeciv/FreecivCode-v0')
-    agent = ParallelLanguageAgent()
+    agent = AutoGPTAgent()
 
     observations, info = env.reset()
     done = False

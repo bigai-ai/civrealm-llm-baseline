@@ -24,6 +24,7 @@ from agents.prompt_handlers.base_prompt_handler import BasePromptHandler
 warnings.filterwarnings('ignore')
 
 cwd = os.getcwd()
+BASE_PH = BasePromptHandler()
 openai_keys_file = os.path.join(cwd, "agents/civ_autogpt/openai_keys.txt")
 saved_dialogue_file = os.path.join(
     cwd, "agents/civ_autogpt/saved_dialogues/saved_dialogue.txt")
@@ -52,7 +53,7 @@ class GPTAgent:
     This agent uses GPT-3 to generate actions.
     """
 
-    def __init__(self, model, prompt_handler: BasePromptHandler):
+    def __init__(self, model, prompt_handler: BasePromptHandler = BASE_PH):
         self.model = model
         self.dialogue = []
         self.taken_actions_list = []
