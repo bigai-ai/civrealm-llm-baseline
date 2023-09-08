@@ -14,15 +14,24 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from .parallel_manager import ParallelManager
+from .language_agent import LanguageAgent
 
 
-class ManagerFactory(object):
+class ParallelLanguageAgent(LanguageAgent):
     def __init__(self):
+        super().__init__()
+
+    def initialize_workers(self):
+        pass
+    
+    def add_entity(self, entity_type, entity_id):
         pass
 
-    def create(self, manager_type: str):
-        if manager_type == 'parallel':
-            return ParallelManager()
-        else:
-            raise ValueError("Unknown manager type: {}".format(manager_type))
+    def remove_entity(self, entity_type, entity_id):
+        pass
+
+    def process_observations(self, observations, info):
+        pass
+
+    def make_decisions(self):
+        pass

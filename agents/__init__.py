@@ -1,2 +1,2 @@
 from .baseline_language_agent import BaselineLanguageAgent
-from .language_agent import LanguageAgent
+from .parallel_language_agent import ParallelLanguageAgent
