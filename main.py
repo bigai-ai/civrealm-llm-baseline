@@ -16,7 +16,7 @@
 import warnings
 import gymnasium
 import freeciv_gym
-from agents import BaselineLanguageAgent
+from agents import BaselineLanguageAgent, LanguageAgent
 from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
 from freeciv_gym.configs import fc_args
 
@@ -26,15 +26,20 @@ warnings.filterwarnings('ignore', message='.*The obs returned by the .* method.*
 
 def main():
     env = gymnasium.make('freeciv/FreecivCode-v0')
-    agent = BaselineLanguageAgent()
+    agent = LanguageAgent()
 
     observations, info = env.reset()
     done = False
+    step = 0
     while not done:
         try:
             action = agent.act(observations, info)
             observations, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
+
+            step += 1
+            print(
+                f'Step: {step}, Turn: {info["turn"]}, Reward: {reward}, Terminated: {terminated}, Truncated: {truncated}')
         except Exception as e:
             fc_logger.error(repr(e))
             raise e
