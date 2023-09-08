@@ -16,16 +16,17 @@
 import warnings
 import gymnasium
 import freeciv_gym
-from agents import LanguageAgent
+from agents import BaselineLanguageAgent
 from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
 from freeciv_gym.configs import fc_args
 
 # FIXME: This is a hack to suppress the warning about the gymnasium spaces. Currently Gymnasium does not support hierarchical actions.
 warnings.filterwarnings('ignore', message='.*The obs returned by the .* method.*')
 
+
 def main():
     env = gymnasium.make('freeciv/FreecivCode-v0')
-    agent = LanguageAgent()
+    agent = BaselineLanguageAgent()
 
     observations, info = env.reset()
     done = False

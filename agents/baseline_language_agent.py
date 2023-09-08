@@ -28,7 +28,7 @@ cwd = os.getcwd()
 BASE_PH = BasePromptHandler()
 
 
-class LanguageAgent(BaseAgent):
+class BaselineLanguageAgent(BaseAgent):
     def __init__(self,
                  LLM_model='gpt-35-turbo',
                  load_dialogue=False,

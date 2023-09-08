@@ -1,1 +1,1 @@
-from .language_agent import LanguageAgent
+from .baseline_language_agent import BaselineLanguageAgent
