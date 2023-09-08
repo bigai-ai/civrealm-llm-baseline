@@ -1,3 +1,18 @@
+# Copyright (C) 2023  The Freeciv-gym project
+#
+# This program is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import os
 import openai
 import time
@@ -7,7 +22,7 @@ import requests
 import warnings
 
 from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
-from .utils import num_tokens_from_messages, send_message_to_llama, send_message_to_vicuna, extract_json, send_message_to_llama, TOKEN_LIMIT_TABLE
+from ..civ_autogpt.utils import num_tokens_from_messages, extract_json, TOKEN_LIMIT_TABLE
 from langchain.chat_models import ChatOpenAI, AzureChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationSummaryBufferMemory
@@ -21,10 +36,11 @@ from langchain.llms import OpenAI, AzureOpenAI
 from langchain.chains.question_answering import load_qa_chain
 from agents.prompt_handlers.base_prompt_handler import BasePromptHandler
 
+from .base_worker import BaseWorker
+
 warnings.filterwarnings('ignore')
 
 cwd = os.getcwd()
-BASE_PH = BasePromptHandler()
 openai_keys_file = os.path.join(cwd, "agents/civ_autogpt/openai_keys.txt")
 saved_dialogue_file = os.path.join(
     cwd, "agents/civ_autogpt/saved_dialogues/saved_dialogue.txt")
@@ -32,19 +48,19 @@ task_prompt_file = os.path.join(cwd,
                                 "agents/civ_autogpt/prompts/task_prompt.txt")
 
 
-class GPTAgent:
+class AzureGPTWorker(BaseWorker):
     """
     This agent uses GPT-3 to generate actions.
     """
 
-    def __init__(self, model, prompt_handler: BasePromptHandler = BASE_PH):
+    def __init__(self, model):
         self.model = model
         self.dialogue = []
         self.taken_actions_list = []
         self.message = ''
 
         self.openai_api_keys = self.load_openai_keys()
-        self.prompt_handler = prompt_handler
+        self.prompt_handler = BasePromptHandler()
         self.state_prompt = self._load_state_prompt()
         self.task_prompt = self._load_task_prompt()
 
@@ -416,11 +432,9 @@ class GPTAgent:
         return response
 
     def reset(self):
-        # super().reset()
         self.dialogue = []
         self.message = ''
         self.taken_actions_list = []
-        # self.gpt_extractor.reset()
 
         self.openai_api_keys = self.load_openai_keys()
         self.state_prompt = self._load_state_prompt()

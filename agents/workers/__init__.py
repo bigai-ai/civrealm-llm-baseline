@@ -1,1 +1,1 @@
-from .base_worker import BaseWorker
+from .gpt_worker import AzureGPTWorker

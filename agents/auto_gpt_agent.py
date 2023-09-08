@@ -14,9 +14,8 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from agents.civ_autogpt import GPTAgent
-
 from .language_agent import LanguageAgent
+from .workers import AzureGPTWorker
 
 
 import random
@@ -31,8 +30,8 @@ class AutoGPTAgent(LanguageAgent):
         super().__init__(llm_model=llm_model)
 
     def initialize_workers(self, llm_model: str):
-        return GPTAgent(model=llm_model)
-    
+        return AzureGPTWorker(model=llm_model)
+
     def add_entity(self, entity_type, entity_id):
         pass
 
@@ -65,7 +64,7 @@ class AutoGPTAgent(LanguageAgent):
                 break
             try:
                 response = self.workers.communicate(input_prompt,
-                                                        parse_choice_tag=False)
+                                                    parse_choice_tag=False)
                 self.workers.memory.save_context(
                     {'user': input_prompt}, {'assistant': str(response)})
                 exec_action_name = self.workers.process_command(
@@ -102,7 +101,7 @@ class AutoGPTAgent(LanguageAgent):
 
                 obs_input_prompt = f"""The unit is {current_unit_name}, observation is {current_unit_obs}. Your available action list is {current_avail_actions_list}. """
                 print('current unit:', current_unit_name, '; unit id:',
-                        valid_actor_id)
+                      valid_actor_id)
 
                 exec_action_name = self.interact_with_llm_within_time_limit(
                     obs_input_prompt, current_unit_name,
@@ -132,7 +131,7 @@ class AutoGPTAgent(LanguageAgent):
 
                 obs_input_prompt = f"""The city is {current_city_name}, observation is {current_city_obs}. Your available action list is {current_avail_actions_list}. """
                 print('current city:', current_city_name, '; city id:',
-                        valid_actor_id)
+                      valid_actor_id)
 
                 exec_action_name = self.interact_with_llm_within_time_limit(
                     obs_input_prompt, current_city_name,
