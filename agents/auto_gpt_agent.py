@@ -63,10 +63,7 @@ class AutoGPTAgent(LanguageAgent):
                 print('overtime, randomly choose:', exec_action_name)
                 break
             try:
-                response = self.workers.communicate(input_prompt,
-                                                    parse_choice_tag=False)
-                self.workers.memory.save_context(
-                    {'user': input_prompt}, {'assistant': str(response)})
+                response = self.workers.communicate(input_prompt)
                 exec_action_name = self.workers.process_command(
                     response, input_prompt, current_ctrl_obj_name,
                     avail_action_list)

@@ -15,6 +15,7 @@
 
 
 from abc import ABC, abstractmethod
+from typing import Callable
 
 from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
 from langchain.memory import ConversationSummaryBufferMemory
@@ -39,6 +40,10 @@ class BaseWorker(ABC):
         self.init_llm()
         self.init_index()
 
+        self.command_handlers = {}
+        self.register_all_commands()
+        self.taken_actions_list = []
+
     @abstractmethod
     def init_prompts(self):
         pass
@@ -55,8 +60,27 @@ class BaseWorker(ABC):
         pass
 
     @abstractmethod
-    def query(self):
+    def register_all_commands(self):
         pass
+
+    def register_command(self, command: str, handler: Callable):
+        self.command_handlers[command] = handler
+
+    @abstractmethod
+    def communicate(self):
+        """ Main entry point for the agent to communicate with the LLM.
+        """
+        pass
+
+    def taken_actions_list_needs_update(self, check_content, check_num=3, top_k_characters=None):
+        # Check if there are too many recent repeated actions of check_content in the taken_actions_list.
+        if len(self.taken_actions_list) < check_num:
+            return False
+        
+        for action in self.taken_actions_list[-check_num:]:
+            if action[:top_k_characters] != check_content:
+                return False
+        return True
 
     def get_similiar_docs(self, query, k=2, score=False):
         if score:
@@ -118,3 +142,9 @@ class BaseWorker(ABC):
             if user_tag == 1:
                 self.dialogue.append(temp_message)
                 user_tag = 0
+    
+    def update_dialogue_and_communicate(self, chat_content, pop_num=0):
+        for _ in range(pop_num):
+            self.dialogue.pop(-1)
+        return self.communicate(chat_content)
+
