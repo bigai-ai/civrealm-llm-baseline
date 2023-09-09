@@ -20,16 +20,19 @@ from queue import Queue
 
 from freeciv_gym.agents.base_agent import BaseAgent
 
+from agents.prompt_handlers.base_prompt_handler import BasePromptHandler
+
 
 class LanguageAgent(BaseAgent):
-    def __init__(self, llm_model: str):
+    def __init__(self):
         super().__init__()
         self.is_new_turn = False
         self.entities = {'unit': set(), 'city': set()}
-        self.workers = self.initialize_workers(llm_model)
+        self.workers = self.initialize_workers()
         self.processed_observations = None
         self.processed_info = None
         self.chosen_actions = Queue()
+        self.prompt_handler = BasePromptHandler()
 
     @abstractmethod
     def initialize_workers(self):

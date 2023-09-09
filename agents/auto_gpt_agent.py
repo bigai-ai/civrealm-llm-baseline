@@ -14,9 +14,6 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from .language_agent import LanguageAgent
-from .workers import AzureGPTWorker
-
 
 import random
 import time
@@ -24,13 +21,16 @@ import os
 from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
 from freeciv_gym.freeciv.utils.language_agent_utility import MOVE_NAMES, INVERSE_MOVE_NAMES
 
+from .language_agent import LanguageAgent
+from .workers import AzureGPTWorker
+
 
 class AutoGPTAgent(LanguageAgent):
-    def __init__(self, llm_model: str = 'gpt-35-turbo'):
-        super().__init__(llm_model=llm_model)
+    def __init__(self):
+        super().__init__()
 
-    def initialize_workers(self, llm_model: str):
-        return AzureGPTWorker(model=llm_model)
+    def initialize_workers(self):
+        return AzureGPTWorker()
 
     def add_entity(self, entity_type, entity_id):
         pass
