@@ -1,0 +1,1 @@
+You should only use the available commands! The available commands are <% action %>. 

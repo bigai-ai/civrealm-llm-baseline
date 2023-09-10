@@ -22,26 +22,19 @@ from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
 from freeciv_gym.freeciv.utils.language_agent_utility import MOVE_NAMES, INVERSE_MOVE_NAMES
 from freeciv_gym.configs import fc_args
 from agents.civ_autogpt import GPTAgent
-from agents.prompt_handlers.base_prompt_handler import BasePromptHandler
-
-cwd = os.getcwd()
-BASE_PH = BasePromptHandler()
 
 
 class BaselineLanguageAgent(BaseAgent):
     def __init__(self,
                  LLM_model='gpt-35-turbo',
-                 load_dialogue=False,
-                 prompt_handler: BasePromptHandler = BASE_PH):
+                 load_dialogue=False):
         super().__init__()
 
         self.turn = 0
-        self.prompt_handler = prompt_handler
         if "debug.agentseed" in fc_args:
             self.set_agent_seed(fc_args["debug.agentseed"])
 
-        self.gpt_agent = GPTAgent(model=LLM_model,
-                                  prompt_handler=self.prompt_handler)
+        self.gpt_agent = GPTAgent(model=LLM_model)
         if load_dialogue:
             self.gpt_agent.load_saved_dialogue()
 
@@ -144,7 +137,7 @@ class BaselineLanguageAgent(BaseAgent):
         local_time = time.localtime()
         self.gpt_agent.save_dialogue_to_file(
             os.path.join(
-                cwd, "agents/civ_autogpt/saved_dialogues/" +
+                os.getcwd(), "agents/civ_autogpt/saved_dialogues/" +
                 f"saved_dialogue_for_T{info['turn'] + 1}_at_{local_time.tm_year}_{local_time.tm_mon}_{local_time.tm_mday}.txt"
             ))
         return None

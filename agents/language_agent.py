@@ -27,6 +27,9 @@ class LanguageAgent(BaseAgent):
     def __init__(self):
         super().__init__()
         self.is_new_turn = False
+        self.planned_actor_ids = []
+        self.turn = None
+
         self.entities = {'unit': set(), 'city': set()}
         self.workers = self.initialize_workers()
         self.processed_observations = None
@@ -101,6 +104,7 @@ class LanguageAgent(BaseAgent):
         else:
             return False
 
+    @final
     def act(self, observations, info):
         self.check_is_new_turn(info)
         if self.is_new_turn:
