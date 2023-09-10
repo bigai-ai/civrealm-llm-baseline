@@ -27,10 +27,10 @@ from .workers import AzureGPTWorker
 class ParallelAutoGPTAgent(LanguageAgent):
     def __init__(self):
         super().__init__()
+        self.dialogue_dir = os.path.join(os.getcwd(), 'agents/civ_autogpt/saved_dialogues/')
 
     def initialize_workers(self):
         self.workers = {}
-        self.dialogue_dir = os.path.join(os.getcwd(), 'agents/civ_autogpt/saved_dialogues/')
     
     def add_entity(self, entity_type, entity_id):
         self.workers[(entity_type, entity_id)] = AzureGPTWorker()
@@ -42,12 +42,15 @@ class ParallelAutoGPTAgent(LanguageAgent):
         self.observations = observations
         self.info = info
 
+    def get_obs_input_prompt(self, ctrl_type, actor_name, actor_dict, available_actions):
+        current_unit_obs = actor_dict['observations']['minimap']
+        return f'The {ctrl_type} is {actor_name}, observation is {current_unit_obs}. Your available action list is {available_actions}. '
+
     def make_single_decision(self, ctrl_type, actor_id, actor_dict):
         worker = self.workers[(ctrl_type, actor_id)]
         actor_name = actor_dict['name']
-        current_unit_obs = actor_dict['observations']['minimap']
         available_actions = make_action_list_readable(actor_dict['available_actions'])
-        obs_input_prompt = f'The {ctrl_type} is {actor_name}, observation is {current_unit_obs}. Your available action list is {available_actions}. '
+        obs_input_prompt = self.get_obs_input_prompt(ctrl_type, actor_name, actor_dict, available_actions)
         print(f'Current {ctrl_type}: {actor_name}')
         exec_action_name = worker.choose_action(obs_input_prompt, available_actions)
         print(f'Action chosen for {actor_name}:', exec_action_name)

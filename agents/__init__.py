@@ -1,3 +1,4 @@
 from .baseline_language_agent import BaselineLanguageAgent
 from .auto_gpt_agent import AutoGPTAgent
 from .parallel_auto_gpt_agent import ParallelAutoGPTAgent
+from .hierarchical_gpt_agent import HierarchicalGPTAgent

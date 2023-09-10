@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 import os
 import random
 import json
@@ -50,8 +51,8 @@ class AzureGPTWorker(BaseWorker):
 
     def init_prompts(self):
         self.prompt_handler = BasePromptHandler(prompt_prefix='./civ_prompts')
-        self.intruction_prompt = self._load_intruction_prompt()
-        self.task_prompt = self._load_task_prompt()
+        self._load_intruction_prompt()
+        self._load_task_prompt()
 
     def init_llm(self):
         openai.api_type = os.environ["OPENAI_API_TYPE"]
@@ -82,12 +83,10 @@ class AzureGPTWorker(BaseWorker):
     def _load_intruction_prompt(self):
         intruction_prompt = self.prompt_handler.instruction_prompt()
         self.add_user_message_to_dialogue(intruction_prompt)
-        return intruction_prompt
 
     def _load_task_prompt(self):
         task_prompt = self.prompt_handler.task_prompt()
         self.add_user_message_to_dialogue(task_prompt)
-        return task_prompt
     
     def register_all_commands(self):
         self.register_command('manualAndHistorySearch', self.handle_command_manual_and_history_search)
@@ -116,7 +115,8 @@ class AzureGPTWorker(BaseWorker):
     def handle_command_final_decision(self, command_input, obs_input_prompt, current_avail_actions):
         exec_action = command_input['action'].split(' ')[0]
         if exec_action not in current_avail_actions:
-            print(f'Choosing "{exec_action}" not in the available action list, retrying...')
+            print(f'Chosen action "{exec_action}" not in the available action list, available actions are {current_avail_actions}, retrying...')
+            fc_logger.error(f'Chosen action "{exec_action}" not in the available action list, available actions are {current_avail_actions}, retrying...')
             return None, self.prompt_handler.insist_avail_action()
         
         self.taken_actions_list.append(command_input['action'])
@@ -144,7 +144,6 @@ class AzureGPTWorker(BaseWorker):
         return response
 
     def parse_response(self, response):
-        fc_logger.debug(f'Parsing response: {response}')
         content = response['choices'][0]['message']['content']
         start_index = content.find('{')
         end_index = content.rfind('}') + 1
