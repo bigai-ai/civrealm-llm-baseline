@@ -16,7 +16,7 @@
 import warnings
 import gymnasium
 import freeciv_gym
-from agents import BaselineLanguageAgent, AutoGPTAgent
+from agents import BaselineLanguageAgent, AutoGPTAgent, ParallelAutoGPTAgent
 from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
 from freeciv_gym.configs import fc_args
 
@@ -29,7 +29,7 @@ def main():
     # agent = BaselineLanguageAgent()
 
     env = gymnasium.make('freeciv/FreecivLLM-v0')
-    agent = AutoGPTAgent()
+    agent = ParallelAutoGPTAgent()
 
     observations, info = env.reset()
     done = False

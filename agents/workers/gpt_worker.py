@@ -108,7 +108,11 @@ class AzureGPTWorker(BaseWorker):
         self.memory.save_context({'assistant': query}, {'user': answer})
         self.taken_actions_list.append('look_up')
         return None, ''
-        
+    
+    def handle_command_ask_current_game_information(self, command_input, obs_input_prompt, current_avail_actions):
+        self.taken_actions_list.append('askCurrentGameInformation')
+        return None
+
     def handle_command_final_decision(self, command_input, obs_input_prompt, current_avail_actions):
         exec_action = command_input['action'].split(' ')[0]
         if exec_action not in current_avail_actions:
@@ -129,7 +133,8 @@ class AzureGPTWorker(BaseWorker):
         return openai.ChatCompletion.create(
             deployment_id=self.deployment_name,
             model=self.model,
-            messages=self.dialogue)
+            messages=self.dialogue,
+            request_timeout=10)
 
     def generate_command(self, prompt: str):
         self.add_user_message_to_dialogue(prompt + self.prompt_handler.insist_json())

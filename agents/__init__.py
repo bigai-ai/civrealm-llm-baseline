@@ -1,3 +1,3 @@
 from .baseline_language_agent import BaselineLanguageAgent
 from .auto_gpt_agent import AutoGPTAgent
-from .parallel_language_agent import ParallelLanguageAgent
+from .parallel_auto_gpt_agent import ParallelAutoGPTAgent

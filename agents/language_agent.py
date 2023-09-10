@@ -20,7 +20,30 @@ from queue import Queue
 
 from freeciv_gym.agents.base_agent import BaseAgent
 
-from agents.prompt_handlers.base_prompt_handler import BasePromptHandler
+
+"""
+The following is a template to create a language agent by inheriting from LanguageAgent.
+
+class MyLanguageAgent(LanguageAgent):
+    def __init__(self):
+        super().__init__()
+
+    def initialize_workers(self):
+        pass
+    
+    def add_entity(self, entity_type, entity_id):
+        pass
+
+    def remove_entity(self, entity_type, entity_id):
+        pass
+
+    def process_observations_and_info(self, observations, info):
+        pass
+
+    def make_decisions(self):
+        pass
+
+"""
 
 
 class LanguageAgent(BaseAgent):
@@ -31,11 +54,11 @@ class LanguageAgent(BaseAgent):
         self.turn = None
 
         self.entities = {'unit': set(), 'city': set()}
-        self.workers = self.initialize_workers()
+        self.workers = None
+        self.initialize_workers()
         self.processed_observations = None
         self.processed_info = None
         self.chosen_actions = Queue()
-        self.prompt_handler = BasePromptHandler()
 
     @abstractmethod
     def initialize_workers(self):
@@ -110,10 +133,17 @@ class LanguageAgent(BaseAgent):
         if self.is_new_turn:
             self.handle_new_turn(observations, info)
 
-        if not self.chosen_actions.empty():
+
+        while not self.chosen_actions.empty():
             action = self.chosen_actions.get()
-            while not self.is_action_valid(info, action):
-                action = self.chosen_actions.get()
-            return action
-        else:
-            return None
+            if self.is_action_valid(info, action):
+                return action
+        return None
+
+        # if not self.chosen_actions.empty():
+        #     action = self.chosen_actions.get()
+        #     while not self.is_action_valid(info, action):
+        #         action = self.chosen_actions.get()
+        #     return action
+        # else:
+        #     return None

@@ -14,46 +14,56 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 import os
 import time
-from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
+import threading
+
 from freeciv_gym.freeciv.utils.language_agent_utility import make_action_list_readable, get_action_from_readable_name
 
 from .language_agent import LanguageAgent
 from .workers import AzureGPTWorker
 
 
-class AutoGPTAgent(LanguageAgent):
+class ParallelAutoGPTAgent(LanguageAgent):
     def __init__(self):
         super().__init__()
 
     def initialize_workers(self):
-        self.workers = AzureGPTWorker()
+        self.workers = {}
         self.dialogue_dir = os.path.join(os.getcwd(), 'agents/civ_autogpt/saved_dialogues/')
-
+    
     def add_entity(self, entity_type, entity_id):
-        pass
+        self.workers[(entity_type, entity_id)] = AzureGPTWorker()
 
     def remove_entity(self, entity_type, entity_id):
-        pass
+        del self.workers[(entity_type, entity_id)]
 
     def process_observations_and_info(self, observations, info):
         self.observations = observations
         self.info = info
 
+    def make_single_decision(self, ctrl_type, actor_id, actor_dict):
+        worker = self.workers[(ctrl_type, actor_id)]
+        actor_name = actor_dict['name']
+        current_unit_obs = actor_dict['observations']['minimap']
+        available_actions = make_action_list_readable(actor_dict['available_actions'])
+        obs_input_prompt = f'The {ctrl_type} is {actor_name}, observation is {current_unit_obs}. Your available action list is {available_actions}. '
+        print(f'Current {ctrl_type}: {actor_name}')
+        exec_action_name = worker.choose_action(obs_input_prompt, available_actions)
+        print(f'Action chosen for {actor_name}:', exec_action_name)
+        exec_action_name = get_action_from_readable_name(exec_action_name)
+        if exec_action_name:
+            self.chosen_actions.put((ctrl_type, actor_id, exec_action_name))
+
+        worker.save_dialogue_to_file(os.path.join(self.dialogue_dir, f"dialogue_T{self.info['turn'] + 1}_at_{time.strftime('%Y.%m.%d_%H:%M:%S')}.txt"))
+
     def make_decisions(self):
+        threads = []
         for ctrl_type in self.info['llm_info'].keys():
             for actor_id, actor_dict in self.info['llm_info'][ctrl_type].items():
-                actor_name = actor_dict['name']
-                current_unit_obs = actor_dict['observations']['minimap']
-                available_actions = make_action_list_readable(actor_dict['available_actions'])
-                obs_input_prompt = f'The {ctrl_type} is {actor_name}, observation is {current_unit_obs}. Your available action list is {available_actions}. '
-                print(f'Current {ctrl_type}: {actor_name}')
-                exec_action_name = self.workers.choose_action(obs_input_prompt, available_actions)
-                exec_action_name = get_action_from_readable_name(exec_action_name)
-                print('Action chosen:', exec_action_name)
-                if exec_action_name:
-                    self.chosen_actions.put((ctrl_type, actor_id, exec_action_name))
-
-                self.workers.save_dialogue_to_file(os.path.join(self.dialogue_dir, f"dialogue_T{self.info['turn'] + 1}_at_{time.strftime('%Y.%m.%d_%H:%M:%S')}.txt"))
+                thread = threading.Thread(target=self.make_single_decision, args=(ctrl_type, actor_id, actor_dict))
+                threads.append(thread)
+                thread.start()
+        
+        for thread in threads:
+            thread.join()
