@@ -1,0 +1,1 @@
+Can you guide me to play the Freeciv game? You will be provided a global observation of all the units / cities, together with their owner. You must find a general strategy of this turn for all other agents each controlling an entity. Please use your policy history carefully.

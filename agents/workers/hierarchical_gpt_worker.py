@@ -13,15 +13,28 @@
 # You should have received a copy of the GNU General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from .gpt_worker import AzureGPTWorker
 
 
 class HierarchicalGPTWorker(AzureGPTWorker):
-    def _load_intruction_prompt(self):
-        intruction_prompt = self.prompt_handler.hierarchical_instruction_prompt()
-        self.add_user_message_to_dialogue(intruction_prompt)
-    
+    def __init__(self, role="controller"):
+        self.role = role
+        super().__init__()
+
+    def _load_instruction_prompt(self):
+        if self.role == "controller":
+            instruction_prompt = self.prompt_handler.hierarchical_instruction_prompt(
+            )
+
+        else:
+            instruction_prompt = self.prompt_handler.advisor_instruction_nomap(
+            )
+            pass
+        self.add_user_message_to_dialogue(instruction_prompt)
+
     def _load_task_prompt(self):
-        task_prompt = self.prompt_handler.hierarchical_task_prompt()
+        if self.role == "controller":
+            task_prompt = self.prompt_handler.hierarchical_task_prompt()
+        else:
+            task_prompt = self.prompt_handler.advisor_task()
         self.add_user_message_to_dialogue(task_prompt)
