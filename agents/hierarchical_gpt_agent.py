@@ -52,7 +52,7 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
             )
             current_prod += f"{PROD_KINDS[kind]}"
             current_prod += f"{PROD_REF[self.observations['city'][int(actor_name.split()[-1])]['production_value']]}"
-            available_actions += "keep activity"
+            available_actions += ["keep activity"]
         else:
             current_prod = ""
 
