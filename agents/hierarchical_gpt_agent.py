@@ -21,7 +21,7 @@ from .workers import HierarchicalGPTWorker
 from agents.redundants.improvement_consts import UNIT_TYPES, IMPR_TYPES
 
 PROD_KINDS = ["improvement", "unit"]
-PROD_REF = [UNIT_TYPES, IMPR_TYPES]
+PROD_REF = IMPR_TYPES + UNIT_TYPES
 
 
 class HierarchicalGPTAgent(ParallelAutoGPTAgent):
@@ -42,15 +42,19 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
         zoom_in_obs = actor_dict['observations']['minimap']
         zoom_out_obs = actor_dict['observations']['upper_map']
         if ctrl_type == "city":
+
             current_prod = "The city is currently building the "
             kind = self.observations['city'][int(
                 actor_name.split()[-1])]['production_kind'] // 3 - 1
+            print("CITY", actor_name, kind)
+            print(
+                f"{PROD_REF[self.observations['city'][int(actor_name.split()[-1])]['production_value']]}"
+            )
             current_prod += f"{PROD_KINDS[kind]}"
-            current_prod += f"{PROD_REF[kind][self.observations['city'][int(actor_name.split()[-1])]['production_value']]}"
+            current_prod += f"{PROD_REF[self.observations['city'][int(actor_name.split()[-1])]['production_value']]}"
             available_actions += "keep activity"
         else:
             current_prod = ""
-        print("CURRENT_PROD", current_prod)
 
         return f'{self.general_advise}\n The {ctrl_type} is {actor_name}.\nThe zoomed-out observation is {zoom_out_obs}.\nThe zoomed-in observation is {zoom_in_obs}.\n{current_prod}\nThe available actions are {available_actions}. You should choose one of these actions according to the above observations.'
 
@@ -93,8 +97,8 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
                 continue
             city_num_other += 1
 
-        print(munit_num_self, wunit_num_self, unit_num_enemy, city_num_self,
-              city_size_self, city_num_other, city_num_enemy)
+        # print(munit_num_self, wunit_num_self, unit_num_enemy, city_num_self,
+        #       city_size_self, city_num_other, city_num_enemy)
 
         # hand written conditions, change it later.
         if (unit_num_enemy > munit_num_self / 5
