@@ -19,9 +19,11 @@ import freeciv_gym
 from agents import BaselineLanguageAgent, AutoGPTAgent, ParallelAutoGPTAgent, HierarchicalGPTAgent
 from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
 from freeciv_gym.configs import fc_args
+from freeciv_gym.envs.freeciv_llm_wrapper_env import FreecivLLMWrapperEnv
 
 # FIXME: This is a hack to suppress the warning about the gymnasium spaces. Currently Gymnasium does not support hierarchical actions.
-warnings.filterwarnings('ignore', message='.*The obs returned by the .* method.*')
+warnings.filterwarnings('ignore',
+                        message='.*The obs returned by the .* method.*')
 
 
 def main():
@@ -29,6 +31,7 @@ def main():
     # agent = BaselineLanguageAgent()
 
     env = gymnasium.make('freeciv/FreecivLLM-v0')
+    # env = FreecivLLMWrapperEnv(env)
     agent = HierarchicalGPTAgent()
 
     observations, info = env.reset()
@@ -37,17 +40,18 @@ def main():
     while not done:
         try:
             action = agent.act(observations, info)
-            observations, reward, terminated, truncated, info = env.step(action)
+            observations, reward, terminated, truncated, info = env.step(
+                action)
             done = terminated or truncated
 
             step += 1
             print(
-                f'Step: {step}, Turn: {info["turn"]}, Reward: {reward}, Terminated: {terminated}, Truncated: {truncated}')
+                f'Step: {step}, Turn: {info["turn"]}, Reward: {reward}, Terminated: {terminated}, Truncated: {truncated}'
+            )
         except Exception as e:
             fc_logger.error(repr(e))
             raise e
     env.close()
-
     '''
     players, tags, turns, evaluations = env.evaluate_game()
     '''

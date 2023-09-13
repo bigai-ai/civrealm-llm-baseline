@@ -14,8 +14,14 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pickle
+import os
+import time
 from .parallel_auto_gpt_agent import ParallelAutoGPTAgent
 from .workers import HierarchicalGPTWorker
+from agents.redundants.improvement_consts import UNIT_TYPES, IMPR_TYPES
+
+PROD_KINDS = ["improvement", "unit"]
+PROD_REF = [UNIT_TYPES, IMPR_TYPES]
 
 
 class HierarchicalGPTAgent(ParallelAutoGPTAgent):
@@ -32,10 +38,21 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
 
     def get_obs_input_prompt(self, ctrl_type, actor_name, actor_dict,
                              available_actions):
+
         zoom_in_obs = actor_dict['observations']['minimap']
         zoom_out_obs = actor_dict['observations']['upper_map']
+        if ctrl_type == "city":
+            current_prod = "The city is currently building the "
+            kind = self.observations['city'][int(
+                actor_name.split()[-1])]['production_kind'] // 3 - 1
+            current_prod += f"{PROD_KINDS[kind]}"
+            current_prod += f"{PROD_REF[kind][self.observations['city'][int(actor_name.split()[-1])]['production_value']]}"
+            available_actions += "keep activity"
+        else:
+            current_prod = ""
+        print("CURRENT_PROD", current_prod)
 
-        return f'{self.general_advise}\n The {ctrl_type} is {actor_name}.\nThe zoomed-out observation is {zoom_out_obs}.\nThe zoomed-in observation is {zoom_in_obs}.\nThe available actions are {available_actions}. You should choose one of these actions according to the above observations.'
+        return f'{self.general_advise}\n The {ctrl_type} is {actor_name}.\nThe zoomed-out observation is {zoom_out_obs}.\nThe zoomed-in observation is {zoom_in_obs}.\n{current_prod}\nThe available actions are {available_actions}. You should choose one of these actions according to the above observations.'
 
     def get_advisor_input_prompt(self, obs, info):
         """
@@ -66,10 +83,15 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
             if key in info['llm_info']['city']:
                 city_num_self += 1
                 city_size_self += val['size']
-            elif obs['dipl'][val['owner']]['diplomatic_state'] == 1:
+                continue
+            if obs['map']['status'][val['x'], val['y']] <= 1:
+                # if a city is not in current view (but in war fog)
+                # it is not counted.
+                continue
+            if obs['dipl'][val['owner']]['diplomatic_state'] == 1:
                 city_num_enemy += 1
-            else:
-                city_num_other += 1
+                continue
+            city_num_other += 1
 
         print(munit_num_self, wunit_num_self, unit_num_enemy, city_num_self,
               city_size_self, city_num_other, city_num_enemy)
@@ -111,6 +133,11 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
         exec_action_name = self.strategy_maker.choose_action(
             obs_input_prompt, ["suggestion"])
         print("GENERAL_ADVISE", exec_action_name)
+        self.strategy_maker.save_dialogue_to_file(
+            os.path.join(
+                self.dialogue_dir,
+                f"dialogue_T{self.info['turn'] + 1}_advisor_at_{time.strftime('%Y.%m.%d_%H:%M:%S')}.txt"
+            ))
         return exec_action_name
 
     def make_decisions(self):
