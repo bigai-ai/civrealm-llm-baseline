@@ -116,6 +116,7 @@ class BaseWorker(ABC):
         exec_action_name = None
         prompt_addition = ''
         start_time = time.time()
+        print("CHOOSE ACTION START:", time)
         while exec_action_name is None:
             if time.time() - start_time < interact_timeout:
                 try:
@@ -123,8 +124,8 @@ class BaseWorker(ABC):
                                                      prompt_addition)
                     exec_action_name, prompt_addition = self.process_command(
                         response, input_prompt, avail_action_list)
-                    print(response['choices']['message'])
-                    self.dialogue += [response['choices']['message']]
+                    print("RESPONSE", response['choices'][0]['message'])
+                    self.dialogue += [response['choices'][0]['message']]
                 except Exception as e:
                     fc_logger.error(f'Error when choosing action: {str(e)}')
                     fc_logger.error(f'input_prompt: {input_prompt}')

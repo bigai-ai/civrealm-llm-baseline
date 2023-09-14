@@ -120,7 +120,6 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
             f"We can see {city_num_enemy} enemy cities, ",
             f"and {city_num_other} other cities.", war_state
         ])
-        print(return_prompt)
         return return_prompt
 
     def generate_general_advise(self):
