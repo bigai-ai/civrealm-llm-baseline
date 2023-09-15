@@ -147,7 +147,8 @@ class LanguageAgent(BaseAgent):
         while self.current_deconflict_depth < self.max_deconflict_depth:
             if self.chosen_actions.empty():
                 self.regenerate_conflict_actions(observations, info)
-
+            if self.chosen_actions.empty():
+                return None
             while not self.chosen_actions.empty():
                 action = self.chosen_actions.get()
                 if self.is_action_valid(info, action):
