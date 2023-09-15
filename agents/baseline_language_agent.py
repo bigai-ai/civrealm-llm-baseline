@@ -138,7 +138,7 @@ class BaselineLanguageAgent(BaseAgent):
         self.gpt_agent.save_dialogue_to_file(
             os.path.join(
                 os.getcwd(), "agents/civ_autogpt/saved_dialogues/" +
-                f"saved_dialogue_for_T{info['turn'] + 1}_at_{local_time.tm_year}_{local_time.tm_mon}_{local_time.tm_mday}.txt"
+                f"saved_dialogue_for_T{info['turn'] + 1:03d}_at_{local_time.tm_year}_{local_time.tm_mon}_{local_time.tm_mday}.txt"
             ))
         return None
 

@@ -24,8 +24,8 @@ from .workers import AzureGPTWorker
 
 
 class ParallelAutoGPTAgent(LanguageAgent):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.dialogue_dir = os.path.join(
             os.getcwd(), 'agents/civ_autogpt/saved_dialogues/')
 
@@ -48,7 +48,10 @@ class ParallelAutoGPTAgent(LanguageAgent):
         if ctrl_type == "city":
             available_actions += ["'keep activity'"]
         prompt = f'The {ctrl_type} is {actor_name}, observation is {current_unit_obs}. Your available action list is {available_actions}.'
-        return prompt
+        system_message = self.info['llm_info'].get("message", "")
+        system_message = ("Game scenario message is: "
+                          if system_message else "") + system_message
+        return system_message + prompt
 
     def make_single_decision(self, ctrl_type, actor_id, actor_dict):
         worker = self.workers[(ctrl_type, actor_id)]
@@ -69,7 +72,7 @@ class ParallelAutoGPTAgent(LanguageAgent):
         worker.save_dialogue_to_file(
             os.path.join(
                 self.dialogue_dir,
-                f"dialogue_T{self.info['turn'] + 1}_{actor_id}_at_{time.strftime('%Y.%m.%d_%H:%M:%S')}.txt"
+                f"dialogue_T{self.info['turn'] + 1:03d}_{actor_id}_at_{time.strftime('%Y.%m.%d_%H:%M:%S')}.txt"
             ))
 
     def make_decisions(self):

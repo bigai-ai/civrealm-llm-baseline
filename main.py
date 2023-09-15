@@ -19,7 +19,7 @@ import freeciv_gym
 from agents import BaselineLanguageAgent, AutoGPTAgent, ParallelAutoGPTAgent, HierarchicalGPTAgent
 from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
 from freeciv_gym.configs import fc_args
-from freeciv_gym.envs.freeciv_llm_wrapper_env import FreecivLLMWrapperEnv
+from freeciv_gym.envs.freeciv_wrapper.llm_wrapper import LLMWrapper
 
 # FIXME: This is a hack to suppress the warning about the gymnasium spaces. Currently Gymnasium does not support hierarchical actions.
 warnings.filterwarnings('ignore',
@@ -27,14 +27,16 @@ warnings.filterwarnings('ignore',
 
 
 def main():
-    # env = gymnasium.make('freeciv/FreecivCode-v0')
+    # env = gymnasium.make('freeciv/FreecivLLMWrapper-v0')
     # agent = BaselineLanguageAgent()
 
-    env = gymnasium.make('freeciv/FreecivLLM-v0')
-    # env = FreecivLLMWrapperEnv(env)
-    agent = HierarchicalGPTAgent()
+    # env = gymnasium.make('freeciv/FreecivLLM-v0')
+    env = gymnasium.make('freeciv/FreecivMinitask-v0')
+    env = LLMWrapper(env)
+    agent = HierarchicalGPTAgent(max_deconflict_depth=4)
 
     observations, info = env.reset()
+
     done = False
     step = 0
     while not done:

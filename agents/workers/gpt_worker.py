@@ -43,7 +43,7 @@ class AzureGPTWorker(BaseWorker):
     """
     This agent uses GPT-3 to generate actions.
     """
-    def __init__(self, model: str = 'gpt-35-turbo'):
+    def __init__(self, model: str = 'gpt-35-turbo-16k'):
         assert os.environ['OPENAI_API_TYPE'] == 'azure'
         super().__init__(model)
 
@@ -122,7 +122,8 @@ class AzureGPTWorker(BaseWorker):
         exec_action = command_input["suggestion"]
         return exec_action, ''
 
-    def handle_command_final_decision(self, command_input, obs_input_prompt, current_avail_actions):
+    def handle_command_final_decision(self, command_input, obs_input_prompt,
+                                      current_avail_actions):
         exec_action = command_input['action']
         if exec_action not in current_avail_actions:
             print(

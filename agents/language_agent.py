@@ -13,14 +13,11 @@
 # You should have received a copy of the GNU General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from abc import ABC, abstractmethod
 from typing import final
 from queue import Queue
 
 from freeciv_gym.agents.base_agent import BaseAgent
-
-
 """
 The following is a template to create a language agent by inheriting from LanguageAgent.
 
@@ -47,7 +44,7 @@ class MyLanguageAgent(LanguageAgent):
 
 
 class LanguageAgent(BaseAgent):
-    def __init__(self):
+    def __init__(self, max_deconflict_depth: int = 1):
         super().__init__()
         self.is_new_turn = False
         self.planned_actor_ids = []
@@ -59,6 +56,9 @@ class LanguageAgent(BaseAgent):
         self.processed_observations = None
         self.processed_info = None
         self.chosen_actions = Queue()
+        self.max_deconflict_depth = max_deconflict_depth
+        self.current_deconflict_depth = 0
+        self.conflict_action_list = []
 
     @abstractmethod
     def initialize_workers(self):
@@ -93,8 +93,10 @@ class LanguageAgent(BaseAgent):
         death_entities = {}
         for entity_type in self.entities:
             new_entities_set = set(observations[entity_type])
-            birth_entities[entity_type] = set(observations[entity_type]) - self.entities[entity_type]
-            death_entities[entity_type] = self.entities[entity_type] - set(observations[entity_type])
+            birth_entities[entity_type] = set(
+                observations[entity_type]) - self.entities[entity_type]
+            death_entities[entity_type] = self.entities[entity_type] - set(
+                observations[entity_type])
             self.entities[entity_type] = new_entities_set
         return birth_entities, death_entities
 
@@ -109,7 +111,8 @@ class LanguageAgent(BaseAgent):
                 self.remove_entity(entity_type, entity_id)
 
     def handle_new_turn(self, observations, info):
-        birth_entities, death_entities = self.get_birth_death_entities(observations)
+        birth_entities, death_entities = self.get_birth_death_entities(
+            observations)
         self.handle_new_entities(birth_entities)
         self.handle_dead_entities(death_entities)
 
@@ -118,6 +121,13 @@ class LanguageAgent(BaseAgent):
         self.make_decisions()
 
         self.is_new_turn = False
+
+    def handle_conflict_actions(self, action):
+        """Handle conflict actions."""
+
+    def regenerate_conflict_actions(self, observations, info):
+        """Let LLM rethink on actions which could not be performed."""
+        self.conflict_action_list = []
 
     def is_action_valid(self, info, action):
         ctrl_type, actor_id, action_name = action
@@ -131,13 +141,20 @@ class LanguageAgent(BaseAgent):
     def act(self, observations, info):
         self.check_is_new_turn(info)
         if self.is_new_turn:
+            self.current_deconflict_depth = 0
             self.handle_new_turn(observations, info)
 
+        while self.current_deconflict_depth < self.max_deconflict_depth:
+            if self.chosen_actions.empty():
+                self.regenerate_conflict_actions(observations, info)
 
-        while not self.chosen_actions.empty():
-            action = self.chosen_actions.get()
-            if self.is_action_valid(info, action):
-                return action
+            while not self.chosen_actions.empty():
+                action = self.chosen_actions.get()
+                if self.is_action_valid(info, action):
+                    return action
+                self.handle_conflict_actions(action)
+            self.current_deconflict_depth += 1
+
         return None
 
         # if not self.chosen_actions.empty():

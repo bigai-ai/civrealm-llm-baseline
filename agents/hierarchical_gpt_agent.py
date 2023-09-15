@@ -16,6 +16,7 @@
 import pickle
 import os
 import time
+import threading
 from .parallel_auto_gpt_agent import ParallelAutoGPTAgent
 from .workers import HierarchicalGPTWorker
 from agents.redundants.improvement_consts import UNIT_TYPES, IMPR_TYPES
@@ -25,8 +26,8 @@ PROD_REF = IMPR_TYPES + UNIT_TYPES
 
 
 class HierarchicalGPTAgent(ParallelAutoGPTAgent):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.general_advise = ""
 
     def initialize_workers(self):
@@ -43,20 +44,17 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
         zoom_out_obs = actor_dict['observations']['upper_map']
         if ctrl_type == "city":
 
-            current_prod = "The city is currently building the "
+            current_prod = "The city is building "
             kind = self.observations['city'][int(
                 actor_name.split()[-1])]['production_kind'] // 3 - 1
             print("CITY", actor_name, kind)
-            print(
-                f"{PROD_REF[self.observations['city'][int(actor_name.split()[-1])]['production_value']]}"
-            )
             current_prod += f"{PROD_KINDS[kind]}"
             current_prod += f"{PROD_REF[self.observations['city'][int(actor_name.split()[-1])]['production_value']]}"
             available_actions += ["keep activity"]
         else:
             current_prod = ""
 
-        return f'{self.general_advise}\n The {ctrl_type} is {actor_name}.\nThe zoomed-out observation is {zoom_out_obs}.\nThe zoomed-in observation is {zoom_in_obs}.\n{current_prod}\nThe available actions are {available_actions}. You should choose one of these actions according to the above observations.'
+        return f'You are controlling {ctrl_type}: {actor_name}.\nThe zoomed-out observation is {zoom_out_obs}.\nThe zoomed-in observation is {zoom_in_obs}.\n{current_prod}.\nThe available actions are {available_actions}. You should choose one of these actions according to the above observations.\nFrom advisor: {self.general_advise}'
 
     def get_advisor_input_prompt(self, obs, info):
         """
@@ -70,6 +68,7 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
         city_num_other = 0
         city_num_enemy = 0
         units = {}
+        # add ['self_id'] to info['llm_info']
         for key, val in obs['unit'].items():
             if key in info['llm_info']['unit'].keys():
                 info_val = info['llm_info']['unit'][key]
@@ -84,7 +83,7 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
                 unit_num_enemy += 1
 
         for key, val in obs['city'].items():
-            if key in info['llm_info']['city']:
+            if val['granary_size'] >= 0:
                 city_num_self += 1
                 city_size_self += val['size']
                 continue
@@ -96,9 +95,6 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
                 city_num_enemy += 1
                 continue
             city_num_other += 1
-
-        # print(munit_num_self, wunit_num_self, unit_num_enemy, city_num_self,
-        #       city_size_self, city_num_other, city_num_enemy)
 
         # hand written conditions, change it later.
         if (unit_num_enemy > munit_num_self / 5
@@ -139,10 +135,35 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
         self.strategy_maker.save_dialogue_to_file(
             os.path.join(
                 self.dialogue_dir,
-                f"dialogue_T{self.info['turn'] + 1}_advisor_at_{time.strftime('%Y.%m.%d_%H:%M:%S')}.txt"
+                f"dialogue_T{self.info['turn'] + 1:03d}_advisor_at_{time.strftime('%Y.%m.%d_%H:%M:%S')}.txt"
             ))
         return exec_action_name
 
     def make_decisions(self):
         self.general_advise = self.generate_general_advise()
         super().make_decisions()
+
+    def handle_conflict_actions(self, action):
+        """
+        Handle conflict actions by adding it into list
+        `self.conflict_action_list`.
+        """
+        self.conflict_action_list += [action]
+
+    def regenerate_conflict_actions(self, observations, info):
+        """Follow a similar logic of `make_decisions`."""
+        print("Regenerating_conflict_actions")
+        self.handle_new_turn(observations, info)
+        # threads = []
+        # args_list = [(action[0], action[1],
+        #               info['llm_info'][action[0]][action[1]])
+        #              for action in self.conflict_action_list]
+        # for args in args_list:
+        #     thread = threading.Thread(target=self.make_single_decision,
+        #                               args=args)
+        #     threads += [thread]
+        #     thread.start()
+
+        # self.conflict_action_list = []
+        # for thread in threads:
+        #     thread.join()
