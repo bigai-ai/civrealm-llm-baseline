@@ -1,0 +1,20 @@
+
+### Example 1
+
+User:
+You are controlling unit: Explorer 113.
+The zoomed-out observation is {current_block: [4 tiles unexplored, 1 Ocean, 2 Desert, 4 Forest, 6 Grassland, 7 Hills, 1 Mountains, 4 Plains, 1 Minor Tribe Village, 1 City], block_west_1: [25 tiles unexplored], block_south_1: [5 Ocean, 2 Desert, 2 Forest, 2 Grassland, 2 Hills, 4 Jungle, 2 Mountains, 4 Plains, ...]}.
+The zoomed-in observation is {current_tile: [Grassland, Resources, 2 Settlers, 2 Workers, 1 Explorer, 1 City, Units and cities belong to myself player_0], tile_north_1: [Hills], tile_south_1: [Mountains, River], tile_east_1: [Forest, River], tile_west_1: [Grassland], tile_east_2: [Grassland, Wheat]}.
+The available actions are [fortify, move north, move south, move west, move east].
+From advisor: We are in peace. So explorer should explore unexplored area. Settlers should build cities near extras. Cities should build more Settlers.
+
+Your response:
+{
+    "thoughts": {
+        "thought": "I am an explorer, we should explore more by moving it. Fortify is bad.",
+        "review": "Available actions are [build, auto_explore, move_north, move_south, move_west, move_east].",
+        "reasoning": "The zoomed-out observation shows that the current block has mostly been seen. The west blocks have many unexplored tiles.",
+        "plan": "- "move_west" is moving towards more unexplored region.\n- I should generate the finalDecision in correct format."
+    },
+    "command": {"name": "finalDecision", "input": {"action": "move west"}}
+}

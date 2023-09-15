@@ -20,18 +20,16 @@ Your suggestion will be broadcast to all other agents.
 
 ### Example 1
 User:
-We have 6 units: settlers amount 2, workers amount 2, diplomacy amount 1 and explorer amount 1. We can see 0 enemy units. We have 0 cities of total size 0. We can see 0 enemy cities, and 0 other cities. We are in peace
-
-
+We have 6 units: settlers amount 2, workers amount 2, diplomacy amount 1 and explorer amount 1. We can see 0 enemy units. We have 0 cities of total size 0. We can see 0 enemy cities, and 0 other cities. We are in peace.
 
 Your response:
 {
     "thoughts": {
         "thought": "We have no cities, so we should build city and expand our territory. In order to build cities in good places, we should explore the map.",
-        "reasoning": "To explore, our units should go towards unexplored region or along coasts. To build city and increase territory, settlers needs to settle down around multiple resources. Priority product is Settlers. Workers should build road and buildings to increase food output.",
+        "reasoning": "To explore, our units should go towards unexplored region or along coasts. To build city and increase territory, settlers needs to settle down around multiple map extras. Priority product is Settlers. Workers should build road and buildings to increase food output.",
         "plan": "- Expand our territory ASAP.\n - Settlers should build cities and produce more settlers.\n - Workers should build road / irrigate / mine.\n - Other units should expand our observation ranges."
     },
-    "command": {"name": "suggestion", "input": {"suggestion": "Settlers should pick a position near resources and settle down. Workers should explore a bit and then build road / irrigation / mine. Keep Workers working. Explorer and diplomacy should focus on exploring the unexplored region or along coasts, and enter the Tribe Villages if possible."}}
+    "command": {"name": "suggestion", "input": {"suggestion": "Settlers should pick a position near map extras and settle down. Workers should explore a bit and then build road / irrigation / mine. Keep Workers working. Explorer and diplomacy should focus on exploring the unexplored region or along coasts, and enter the Tribe Villages if possible."}}
 }
 
 ### Example 2
