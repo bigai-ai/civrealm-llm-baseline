@@ -13,7 +13,7 @@ Give the user advices to perform actions.
     },
     "command": {"name": "suggestion", "input": {"suggestion": "<suggestion prompt to other agents controlling units>"}},
 }
-Your suggestion will be broadcasted to all other agents.
+Your suggestion will be broadcast to all other agents.
 
 
 ## Examples
@@ -42,10 +42,10 @@ We have 10 units: Warriors amount 3, Workers amount 4, Settlers amount 1, diplom
 Response:
 {
     "thoughts": {
-        "thought": "We are under attack! There are 5 our cities, but only 3 millitary units. 4 enemy units are around, so our units should spread into cities close to enemy and defend. Our product should be switched to millitary units, and buy units out if possible.",
+        "thought": "We are under attack! There are 5 our cities, but only 3 military units. 4 enemy units are around, so our units should spread into cities close to enemy and defend. Our product should be switched to millitary units, and buy units out if possible.",
         "reasoning": "We are under attack! We have fewer soldiers than enemy, so defending cities is a good strategy. We should spread our soldiers into different vulnerable cities, and produce more soldiers. We should protect Workers and Settlers.",
-        "plan": "We should defend and produce more millitary units, and build cities far from enemy, until the enemy wasted their units on our cities with our fortified soldiers."
+        "plan": "We should defend and produce more military units, and build cities far from enemy, until the enemy wasted their units on our cities with our fortified soldiers."
     },
-    "command": {"name": "suggestion", "input": {"action": "We are under attack! Millitary units should move to different cities and then fortify in cities. All cities should try to produce millitary units. Settlers should move away from enemies and try to build a new city. Workers should protect themsselves in cites or move away."}}
+    "command": {"name": "suggestion", "input": {"action": "We are under attack! Military units should move to different cities and then fortify in cities. All cities should try to produce military units. Settlers should move away from enemies and try to build a new city. Workers should protect themselves in cites or move away."}}
 }
 

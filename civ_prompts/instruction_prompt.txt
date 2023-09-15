@@ -18,7 +18,7 @@ You should only respond in JSON format as described below:
 
 Here are the possible command_name for you to use:
   manualAndHistorySearch:
-    use: search the Freeciv official manual and your important history interaction message for relevent information. Use sparsingly.
+    use: search the Freeciv official manual and your important history interaction message for relevant information. Use sparingly.
     input: "look_up": "<search terms>"
     output: list of search results
   finalDecision:
@@ -63,7 +63,7 @@ Response:
 {
     "thoughts": {
         "thought": "I need to generate a guiding action for the user",
-        "reasoning": "The user give me the next game state, I have moved the seltter to the river place, so according the manual, I should build city here.",
+        "reasoning": "The user give me the next game state, I have moved the settler to the river place, so according the manual, I should build city here.",
         "plan": "- identify the command to provide the user with the result\n- execute the command with the appropriate input\n- generate the output and return it to the user"
     },
     "command": {"name": "finalDecision", "input": {"action": "build"}}
