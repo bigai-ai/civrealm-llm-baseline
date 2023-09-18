@@ -27,7 +27,7 @@ from ..civ_autogpt.utils import num_tokens_from_messages, extract_json, TOKEN_LI
 
 
 class BaseWorker(ABC):
-    def __init__(self, model: str):
+    def __init__(self, model: str, ctrl_type:str="null", actor_id:int=-1):
         self.model = model
         self.dialogue = []
         self.taken_actions_list = []
@@ -36,6 +36,7 @@ class BaseWorker(ABC):
         self.chain: BaseCombineDocumentsChain = None
         self.memory: ConversationSummaryBufferMemory = None
         self.index: Pinecone = None
+        self.name = f"{ctrl_type} {actor_id}"
 
         self.init_prompts()
         self.init_llm()

@@ -43,9 +43,9 @@ class AzureGPTWorker(BaseWorker):
     """
     This agent uses GPT-3 to generate actions.
     """
-    def __init__(self, model: str = 'gpt-35-turbo-16k'):
+    def __init__(self, model: str = 'gpt-35-turbo-16k', **kwargs):
         assert os.environ['OPENAI_API_TYPE'] == 'azure'
-        super().__init__(model)
+        super().__init__(model, **kwargs)
 
     def init_prompts(self):
         self.prompt_handler = BasePromptHandler(prompt_prefix='./civ_prompts')
@@ -127,10 +127,10 @@ class AzureGPTWorker(BaseWorker):
         exec_action = command_input['action']
         if exec_action not in current_avail_actions:
             print(
-                f'Chosen action "{exec_action}" not in the available action list, available actions are {current_avail_actions}, retrying...'
+                f'{self.name}\'s chosen action "{exec_action}" not in the available action list, available actions are {current_avail_actions}, retrying...'
             )
             fc_logger.error(
-                f'Chosen action "{exec_action}" not in the available action list, available actions are {current_avail_actions}, retrying...'
+                f'{self.name}\'s chosen action "{exec_action}" not in the available action list, available actions are {current_avail_actions}, retrying...'
             )
             return None, self.prompt_handler.insist_avail_action()
 

@@ -29,13 +29,13 @@ saved_dialogue_file = os.path.join(
     cwd, "agents/civ_autogpt/saved_dialogues/saved_dialogue.txt")
 task_prompt_file = os.path.join(cwd,
                                 "agents/civ_autogpt/prompts/task_prompt.txt")
+GPT_MODEL_NAME = "gpt-3.5-turbo-16k"
 
 
 class GPTAgent:
     """
     This agent uses GPT-3 to generate actions.
     """
-
     def __init__(self, model):
         self.model = model
         self.dialogue = []
@@ -59,13 +59,12 @@ class GPTAgent:
                                   deployment_name=self.deployment_name,
                                   temperature=0.7)
             self.chain = load_qa_chain(AzureOpenAI(
-                deployment_name=self.deployment_name,
-                model_name=self.model),
-                chain_type="stuff")
+                deployment_name=self.deployment_name, model_name=self.model),
+                                       chain_type="stuff")
         else:
             self.change_api_base('openai')
             llm = ChatOpenAI(temperature=0.7, openai_api_key=openai.api_key)
-            self.chain = load_qa_chain(OpenAI(model_name="gpt-3.5-turbo"),
+            self.chain = load_qa_chain(OpenAI(model_name=GPT_MODEL_NAME),
                                        chain_type="stuff")
 
         self.memory = ConversationSummaryBufferMemory(llm=llm,
@@ -75,7 +74,8 @@ class GPTAgent:
                       environment=os.environ["MY_PINECONE_ENV"])
 
         self.index = Pinecone.from_existing_index(
-            index_name='langchain-demo', embedding=OpenAIEmbeddings(model="text-embedding-ada-002"))
+            index_name='langchain-demo',
+            embedding=OpenAIEmbeddings(model="text-embedding-ada-002"))
 
     def add_user_message_to_dialogue(self, message):
         self.dialogue.append({'role': 'user', 'content': message})
@@ -258,7 +258,8 @@ class GPTAgent:
                 answer = self.get_answer(query)
                 print('answer:', answer)
                 if random.random() > 0.5:
-                    self.add_user_message_to_dialogue(answer + self.prompt_handler.finish_look_for())
+                    self.add_user_message_to_dialogue(
+                        answer + self.prompt_handler.finish_look_for())
                 else:
                     self.add_user_message_to_dialogue(answer)
 
@@ -274,7 +275,8 @@ class GPTAgent:
             if random.random() < 0.8:
                 self.dialogue.pop(-1)
             else:
-                self.add_user_message_to_dialogue('You should only use the given commands!')
+                self.add_user_message_to_dialogue(
+                    'You should only use the given commands!')
             # self.update_dialogue(obs_input_prompt, pop_num = 1)
 
             return None
@@ -336,12 +338,15 @@ class GPTAgent:
     def parse_response(self, response):
         fc_logger.debug(f'Parsing response: {response}')
 
-        if self.model in ['gpt-3.5-turbo-0301', 'gpt-3.5-turbo', 'gpt-4', 'gpt-4-0314']:
+        if self.model in [
+                'gpt-3.5-turbo-0301', 'gpt-3.5-turbo', 'gpt-4', 'gpt-4-0314'
+        ]:
             return dict(response["choices"][0]["message"])
 
         elif self.model in ["gpt-35-turbo", "gpt-35-turbo-16k"]:
             try:
-                ans = extract_json(response['choices'][0]['message']['content'])
+                ans = extract_json(
+                    response['choices'][0]['message']['content'])
             except:
                 return response["choices"][0]["message"]
             return {'role': 'assistant', 'content': ans}
@@ -376,7 +381,8 @@ class GPTAgent:
             while True:
                 try:
                     self.add_user_message_to_dialogue(
-                        'The former chat history can be summarized as: \n' + self.memory.load_memory_variables({})['history'])
+                        'The former chat history can be summarized as: \n' +
+                        self.memory.load_memory_variables({})['history'])
                     break
                 except Exception as e:
                     print(e)
@@ -400,7 +406,8 @@ class GPTAgent:
                 except Exception as e:
                     # self.dialogue.pop(-1)
                     print(e)
-                    self.add_user_message_to_dialogue('You should only respond in JSON format as described')
+                    self.add_user_message_to_dialogue(
+                        'You should only respond in JSON format as described')
                     print('Not response json, retrying...')
 
                     continue

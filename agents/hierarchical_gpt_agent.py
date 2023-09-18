@@ -35,26 +35,32 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
         self.workers = {}
 
     def add_entity(self, entity_type, entity_id):
-        self.workers[(entity_type, entity_id)] = HierarchicalGPTWorker()
+        self.workers[(entity_type, entity_id)] = HierarchicalGPTWorker(
+            ctrl_type=entity_type, actor_id=entity_id)
 
     def get_obs_input_prompt(self, ctrl_type, actor_name, actor_dict,
                              available_actions):
 
         zoom_in_obs = actor_dict['observations']['minimap']
         zoom_out_obs = actor_dict['observations']['upper_map']
-        if ctrl_type == "city":
+        # if ctrl_type == "city":
 
-            current_prod = "The city is building "
-            kind = self.observations['city'][int(
-                actor_name.split()[-1])]['production_kind'] // 3 - 1
-            print("CITY", actor_name, kind)
-            current_prod += f"{PROD_KINDS[kind]}"
-            current_prod += f"{PROD_REF[self.observations['city'][int(actor_name.split()[-1])]['production_value']]}"
-            available_actions += ["keep activity"]
-        else:
-            current_prod = ""
+        #     current_prod = "The city is building "
+        #     kind = self.observations['city'][int(
+        #         actor_name.split()[-1])]['production_kind'] // 3 - 1
+        #     print("CITY", actor_name, kind)
+        #     current_prod += f"{PROD_KINDS[kind]}"
+        #     current_prod += f"{PROD_REF[self.observations['city'][int(actor_name.split()[-1])]['production_value']]}"
+        #     available_actions += ["keep activity"]
+        # else:
+        #     current_prod = ""   # used in prompt
 
-        return f'You are controlling {ctrl_type}: {actor_name}.\nThe zoomed-out observation is {zoom_out_obs}.\nThe zoomed-in observation is {zoom_in_obs}.\n{current_prod}.\nThe available actions are {available_actions}. You should choose one of these actions according to the above observations.\nFrom advisor: {self.general_advise}'
+        return f'''You are controlling {ctrl_type}: {actor_name}.
+        The zoomed-out observation is {zoom_out_obs}.
+        The zoomed-in observation is {zoom_in_obs}.
+        The available actions are {available_actions}. 
+        You should choose one of these actions according to the above observations.
+        Message from advisor: {self.general_advise}'''
 
     def get_advisor_input_prompt(self, obs, info):
         """
@@ -69,8 +75,10 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
         city_num_enemy = 0
         units = {}
         # add ['self_id'] to info['llm_info']
+        print(info['llm_info'].keys(), info['llm_info']['player'])
         for key, val in obs['unit'].items():
-            if key in info['llm_info']['unit'].keys():
+            info_unit = info['llm_info'].get('unit', {})
+            if key in info_unit.keys():
                 info_val = info['llm_info']['unit'][key]
                 unit_name = info_val["name"].split()[0]
                 units[unit_name] = units.get(unit_name, 0) + 1
@@ -109,7 +117,7 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
 
         unit_spec_prompt = (
             f"We have {wunit_num_self+munit_num_self} units: " +
-            ", ".join(map(lambda x: f"{x[0]} amount {x[1]}", units.items())))
+            ", ".join(map(lambda x: f"{x[1]} {x[0]}", units.items())))
         return_prompt = " ".join([
             unit_spec_prompt, f"and we can see {unit_num_enemy} enemy units.",
             f"We have {city_num_self} cities of total size {city_size_self}.",
@@ -140,8 +148,30 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
         return exec_action_name
 
     def make_decisions(self):
-        self.general_advise = self.generate_general_advise()
-        super().make_decisions()
+        if self.is_new_turn:
+            self.general_advise = self.generate_general_advise()
+
+        threads = []
+        for ctrl_type in self.info['llm_info'].keys():
+            for actor_id, actor_dict in self.info['llm_info'][ctrl_type].items(
+            ):
+                if (self.last_taken_actions.get(
+                    (ctrl_type, actor_id), ["", -2])[1] == self.turn
+                        and ctrl_type != "unit"):
+                    print(
+                        f"{ctrl_type} {actor_id} tries a second move but rejected."
+                    )
+                    continue
+                thread = threading.Thread(target=self.make_single_decision,
+                                          args=(ctrl_type, actor_id,
+                                                actor_dict))
+                threads.append(thread)
+                thread.start()
+
+        for thread in threads:
+            thread.join()
+
+        # super().make_decisions()
 
     def handle_conflict_actions(self, action):
         """
@@ -153,6 +183,7 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
     def regenerate_conflict_actions(self, observations, info):
         """Follow a similar logic of `make_decisions`."""
         print("Regenerating_conflict_actions")
+        # super().regenerate_conflict_actions(observations, info)
         self.handle_new_turn(observations, info)
         # threads = []
         # args_list = [(action[0], action[1],

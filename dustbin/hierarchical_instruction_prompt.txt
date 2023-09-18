@@ -1,4 +1,28 @@
 
+
+
+
+
+
+
+Response:
+{
+    "thoughts": {
+        "thought": "I am controlling Settlers. I need to provide user an available action with the given message.",
+        "reasoning": "The user has given me the current game information. I need to decide a good action for Settlers, so I need to search the manual and think carefully.",
+        "plan": "- search the manual and interaction history for more details\n- get the relative information and take into my account"
+    },
+    "command": {"name": "manualAndHistorySearch", "input": {"look_up": "What is the best way to operate Settlers?"}}
+}
+
+User:
+Settlers can "build city" on tiles away from other cities. You may move close to map extras (Wheat, Wine, Resources, Fruits, Coal, Buffalo, Silk, Fish, Whale) and build city. Rivers are also helpful. Do NOT "join city" unless you really need a city size growth badly.
+
+
+
+
+
+
 ### Example 1
 
 User:

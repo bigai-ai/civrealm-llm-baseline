@@ -27,13 +27,13 @@ warnings.filterwarnings('ignore',
 
 
 def main():
-    # env = gymnasium.make('freeciv/FreecivLLMWrapper-v0')
+    env = gymnasium.make('freeciv/FreecivLLMWrapper-v0')
     # agent = BaselineLanguageAgent()
 
     # env = gymnasium.make('freeciv/FreecivLLM-v0')
-    env = gymnasium.make('freeciv/FreecivMinitask-v0')
+    # env = gymnasium.make('freeciv/FreecivMinitask-v0')
     env = LLMWrapper(env)
-    agent = HierarchicalGPTAgent(max_deconflict_depth=4)
+    agent = HierarchicalGPTAgent(max_deconflict_depth=2)
 
     observations, info = env.reset()
 

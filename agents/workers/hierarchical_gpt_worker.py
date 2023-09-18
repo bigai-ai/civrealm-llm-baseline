@@ -17,9 +17,9 @@ from .gpt_worker import AzureGPTWorker
 
 
 class HierarchicalGPTWorker(AzureGPTWorker):
-    def __init__(self, role="controller"):
+    def __init__(self, role="controller", **kwargs):
         self.role = role
-        super().__init__()
+        super().__init__(**kwargs)
 
     def _load_instruction_prompt(self):
         if self.role == "controller":

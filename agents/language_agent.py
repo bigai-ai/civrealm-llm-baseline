@@ -58,6 +58,7 @@ class LanguageAgent(BaseAgent):
         self.chosen_actions = Queue()
         self.max_deconflict_depth = max_deconflict_depth
         self.current_deconflict_depth = 0
+        self.last_taken_actions = {}
         self.conflict_action_list = []
 
     @abstractmethod
@@ -127,15 +128,17 @@ class LanguageAgent(BaseAgent):
 
     def regenerate_conflict_actions(self, observations, info):
         """Let LLM rethink on actions which could not be performed."""
+        self.process_observations_and_info(observations, info)
         self.conflict_action_list = []
 
     def is_action_valid(self, info, action):
         ctrl_type, actor_id, action_name = action
         action_dict = info['available_actions'][ctrl_type]
+
         if action_name in action_dict[actor_id]:
             return action_dict[actor_id][action_name]
-        else:
-            return False
+
+        return False
 
     @final
     def act(self, observations, info):
@@ -143,6 +146,7 @@ class LanguageAgent(BaseAgent):
         if self.is_new_turn:
             self.current_deconflict_depth = 0
             self.handle_new_turn(observations, info)
+            print(self.chosen_actions)
 
         while self.current_deconflict_depth < self.max_deconflict_depth:
             if self.chosen_actions.empty():
@@ -152,6 +156,9 @@ class LanguageAgent(BaseAgent):
             while not self.chosen_actions.empty():
                 action = self.chosen_actions.get()
                 if self.is_action_valid(info, action):
+                    print(action, tuple(action[:2]))
+                    self.last_taken_actions[tuple(
+                        action[:2])] = [action[2], self.turn]
                     return action
                 self.handle_conflict_actions(action)
             self.current_deconflict_depth += 1

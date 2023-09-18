@@ -33,7 +33,9 @@ class ParallelAutoGPTAgent(LanguageAgent):
         self.workers = {}
 
     def add_entity(self, entity_type, entity_id):
-        self.workers[(entity_type, entity_id)] = AzureGPTWorker()
+        self.workers[(entity_type,
+                      entity_id)] = AzureGPTWorker(ctrl_type=entity_type,
+                                                   actor_id=entity_id)
 
     def remove_entity(self, entity_type, entity_id):
         del self.workers[(entity_type, entity_id)]
@@ -45,8 +47,8 @@ class ParallelAutoGPTAgent(LanguageAgent):
     def get_obs_input_prompt(self, ctrl_type, actor_name, actor_dict,
                              available_actions):
         current_unit_obs = actor_dict['observations']['minimap']
-        if ctrl_type == "city":
-            available_actions += ["'keep activity'"]
+        # if ctrl_type == "city":
+        #     available_actions += ["'keep activity'"]
         prompt = f'The {ctrl_type} is {actor_name}, observation is {current_unit_obs}. Your available action list is {available_actions}.'
         system_message = self.info['llm_info'].get("message", "")
         system_message = ("Game scenario message is: "
@@ -66,7 +68,8 @@ class ParallelAutoGPTAgent(LanguageAgent):
                                                 available_actions)
         print(f'Action chosen for {actor_name}:', exec_action_name)
         exec_action_name = get_action_from_readable_name(exec_action_name)
-        if exec_action_name and exec_action_name != "keep activity":
+        if exec_action_name:
+            # and exec_action_name != "keep activity":
             self.chosen_actions.put((ctrl_type, actor_id, exec_action_name))
 
         worker.save_dialogue_to_file(
