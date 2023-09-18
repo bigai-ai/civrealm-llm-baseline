@@ -115,7 +115,10 @@ class BasePromptHandler:
             print("Error in loading prompt files.", einfo)
             raise einfo
 
-        for fname in [fname[:-4] for fname in files if fname[-4:] == ".txt"]:
+        for fname in [
+                fname[:-4] for fname in files
+                if fname[-4:] == ".txt" and "#" not in fname
+        ]:
             with open(self.prompt_prefix + fname + ".txt",
                       "r",
                       encoding="utf-8") as filep:
