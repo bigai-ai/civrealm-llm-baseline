@@ -77,10 +77,8 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
         # add ['self_id'] to info['llm_info']
         print(info['llm_info'].keys(), info['llm_info']['player'])
         for key, val in obs['unit'].items():
-            info_unit = info['llm_info'].get('unit', {})
-            if key in info_unit.keys():
-                info_val = info['llm_info']['unit'][key]
-                unit_name = info_val["name"].split()[0]
+            if val['owner'] == info['my_player_id']:
+                unit_name = val['type_rule_name']
                 units[unit_name] = units.get(unit_name, 0) + 1
                 if val['type_attack_strength'] == 0:
                     wunit_num_self += 1
@@ -104,11 +102,11 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
                 continue
             city_num_other += 1
 
-        # hand written conditions, change it later.
+        # handwritten conditions, change it later.
         if (unit_num_enemy > munit_num_self / 5
                 and city_num_enemy < unit_num_enemy):
             war_state = "We are under attack."
-        elif (city_num_enemy >= 3 and unit_num_enemy < munit_num_self):
+        elif city_num_enemy >= 3 and unit_num_enemy < munit_num_self:
             war_state = "We are attacking other players."
         elif unit_num_enemy == 0 and city_num_enemy < 3:
             war_state = "We are in peace."
