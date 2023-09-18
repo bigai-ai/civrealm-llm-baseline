@@ -20,14 +20,19 @@ import threading
 from .parallel_auto_gpt_agent import ParallelAutoGPTAgent
 from .workers import HierarchicalGPTWorker
 from agents.redundants.improvement_consts import UNIT_TYPES, IMPR_TYPES
+from config import INDIVIDUAL_PROMPT_DEFAULT, PROMPT_SOLUTIONS
 
 PROD_KINDS = ["improvement", "unit"]
 PROD_REF = IMPR_TYPES + UNIT_TYPES
 
 
 class HierarchicalGPTAgent(ParallelAutoGPTAgent):
-    def __init__(self, **kwargs):
+    def __init__(
+            self,
+            use_entity_individual_prompt: bool = INDIVIDUAL_PROMPT_DEFAULT,
+            **kwargs):
         super().__init__(**kwargs)
+        self.use_entity_individual_prompt = use_entity_individual_prompt
         self.general_advise = ""
 
     def initialize_workers(self):
@@ -35,8 +40,18 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
         self.workers = {}
 
     def add_entity(self, entity_type, entity_id):
+        print(entity_type, entity_id)
+        if self.use_entity_individual_prompt:
+            name = self.info['llm_info'][entity_type][entity_id]['name']
+            name = name.split(" ")[0]
+            print("ENTITY_NAME", name)
+            prompt_prefix = PROMPT_SOLUTIONS[name]
+        else:
+            prompt_prefix = PROMPT_SOLUTIONS['vanilla']
         self.workers[(entity_type, entity_id)] = HierarchicalGPTWorker(
-            ctrl_type=entity_type, actor_id=entity_id)
+            ctrl_type=entity_type,
+            actor_id=entity_id,
+            prompt_prefix=prompt_prefix)
 
     def get_obs_input_prompt(self, ctrl_type, actor_name, actor_dict,
                              available_actions):

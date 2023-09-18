@@ -112,13 +112,13 @@ class LanguageAgent(BaseAgent):
                 self.remove_entity(entity_type, entity_id)
 
     def handle_new_turn(self, observations, info):
+        self.process_observations_and_info(observations, info)
         birth_entities, death_entities = self.get_birth_death_entities(
             observations)
         self.handle_new_entities(birth_entities)
         self.handle_dead_entities(death_entities)
 
         self.chosen_actions = Queue()
-        self.process_observations_and_info(observations, info)
         self.make_decisions()
 
         self.is_new_turn = False

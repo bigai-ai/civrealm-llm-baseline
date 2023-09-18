@@ -24,6 +24,8 @@ import re
 from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
 
 print(os.getcwd())
+PROMPT_ROOT_DIR = "./prompt_collections/"
+BASE_DIR = "base_prompts/"
 
 
 class BasePromptHandler:
@@ -38,7 +40,9 @@ class BasePromptHandler:
     [TODO] How to implement `if` and `for` in the setup? I think importing
     python scripts could be a solution, but another processor must be written.
     """
-    def __init__(self, prompt_prefix: str = "./base_prompts/"):
+    CONF_FNAME = "__settings__.conf"
+
+    def __init__(self, prompt_prefix: str = BASE_DIR):
         """
         Initialize.
 
@@ -46,21 +50,63 @@ class BasePromptHandler:
         ----------
         prompt_prefix: str, must be a folder in a relative form.
         """
-        self.prompt_prefix = prompt_prefix + ("" if prompt_prefix[-1] == "/"
-                                              else "/")
+        self.prompt_prefix = PROMPT_ROOT_DIR + self._ending_dir(prompt_prefix)
+        if not os.path.exists(self.prompt_prefix):
+            if os.path.exists(prompt_prefix):
+                self.prompt_prefix = prompt_prefix
+            else:
+                raise Exception(
+                    f"Prompt prefix dir `{prompt_prefix}` does not exist! " +
+                    f"Use 'example' for {PROMPT_ROOT_DIR}example/," +
+                    "or simply the full path.")
         self.templates = {}
-        self._load_prompt_templates()
+        self.related_pclasses = [self.prompt_prefix]
+        self._solve_dependency()
+        for prefix in reversed(self.related_pclasses):
+            self._load_prompt_templates(prefix)
+
+    @staticmethod
+    def _ending_dir(path: str):
+        """Complete '/' to the end of a dir-path."""
+        return path + ("" if path[-1] == '/' else '/')
 
     @staticmethod
     def _regularize(key: str) -> str:
         # Maybe, more rules?
         return key.replace(".", "_")
 
+    def _solve_dependency(self):
+        """
+        Solve the dependency of prompts.
+
+        BFS on dependency graph.
+        """
+        pclass = [self.prompt_prefix]
+
+        while len(pclass) > 0:
+            current = pclass.pop(0)
+            current = self._ending_dir(current)
+            new_dependency = []
+            with open(current + self.CONF_FNAME, "r",
+                      encoding="utf-8") as filep:
+                for line in filep:
+                    if line.strip()[0] == "#":
+                        continue
+                    conf_kv = line.strip().split(":")
+                    if conf_kv[0].strip().lower() == "parents":
+                        new_dependency += conf_kv[1].split(",")
+                        break
+            for name in new_dependency:
+                path = PROMPT_ROOT_DIR + self._ending_dir(name.strip())
+                if path not in self.related_pclasses:
+                    self.related_pclasses.append(path)
+                    pclass.append(path)
+
     def _txt_parser(self, raw: str, template_name: str) -> callable:
         def parser(_raise_empty: bool = False, **kwargs) -> str:
             nonlocal raw, template_name, self
             variables = set(re.findall("(<%[ ]+(.*?)[ ]+%>)", raw))
-            recursions = set(re.findall("(<\$[ ]+(.*?)[ ]+\$>)", raw))
+            recursions = set(re.findall(r"(<\$[ ]+(.*?)[ ]+\$>)", raw))
 
             for pattern, key in variables:
                 try:
@@ -106,10 +152,10 @@ class BasePromptHandler:
 
         return parser
 
-    def _load_prompt_templates(self):
+    def _load_prompt_templates(self, prefix: str):
         # load text-style templates
         try:
-            files = list(os.walk("./" + self.prompt_prefix))[0][2]
+            files = list(os.walk(prefix))[0][2]
 
         except Exception as einfo:
             print("Error in loading prompt files.", einfo)
@@ -119,9 +165,7 @@ class BasePromptHandler:
                 fname[:-4] for fname in files
                 if fname[-4:] == ".txt" and "#" not in fname
         ]:
-            with open(self.prompt_prefix + fname + ".txt",
-                      "r",
-                      encoding="utf-8") as filep:
+            with open(prefix + fname + ".txt", "r", encoding="utf-8") as filep:
                 raw = filep.read()
             key = self._regularize(fname)
             # self.templates[key] = self._txt_parser(raw, key)
@@ -159,7 +203,8 @@ class BasePromptHandler:
 
 def unit_test():
     """The unit test."""
-    phandler = BasePromptHandler("./base_prompts/")
+    print(list(os.walk("."))[0])
+    phandler = BasePromptHandler(PROMPT_ROOT_DIR + "test_prompts_01_settlers/")
     print(phandler.insist_json())
     return phandler.generate("test_prompt",
                              uid="112",

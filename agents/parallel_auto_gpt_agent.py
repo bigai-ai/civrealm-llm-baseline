@@ -43,6 +43,7 @@ class ParallelAutoGPTAgent(LanguageAgent):
     def process_observations_and_info(self, observations, info):
         self.observations = observations
         self.info = info
+        print("SELF_NOW_HAS_INFO")
 
     def get_obs_input_prompt(self, ctrl_type, actor_name, actor_dict,
                              available_actions):

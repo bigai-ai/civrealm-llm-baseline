@@ -43,12 +43,17 @@ class AzureGPTWorker(BaseWorker):
     """
     This agent uses GPT-3 to generate actions.
     """
-    def __init__(self, model: str = 'gpt-35-turbo-16k', **kwargs):
+    def __init__(self,
+                 model: str = 'gpt-35-turbo-16k',
+                 prompt_prefix: str = "civ_prompts",
+                 **kwargs):
         assert os.environ['OPENAI_API_TYPE'] == 'azure'
+        self.prompt_prefix = prompt_prefix
         super().__init__(model, **kwargs)
 
     def init_prompts(self):
-        self.prompt_handler = BasePromptHandler(prompt_prefix='./civ_prompts')
+        self.prompt_handler = BasePromptHandler(
+            prompt_prefix=self.prompt_prefix)
         self._load_instruction_prompt()
         self._load_task_prompt()
 
