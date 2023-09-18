@@ -40,11 +40,11 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
         self.workers = {}
 
     def add_entity(self, entity_type, entity_id):
-        print(entity_type, entity_id)
+
         if self.use_entity_individual_prompt:
             name = self.info['llm_info'][entity_type][entity_id]['name']
             name = name.split(" ")[0]
-            print("ENTITY_NAME", name)
+
             prompt_prefix = PROMPT_SOLUTIONS[name]
         else:
             prompt_prefix = PROMPT_SOLUTIONS['vanilla']
@@ -58,6 +58,8 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
 
         zoom_in_obs = actor_dict['observations']['minimap']
         zoom_out_obs = actor_dict['observations']['upper_map']
+        
+        # available_actions.remove("keep activity")
         # if ctrl_type == "city":
 
         #     current_prod = "The city is building "
@@ -90,7 +92,7 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
         city_num_enemy = 0
         units = {}
         # add ['self_id'] to info['llm_info']
-        print(info['llm_info'].keys(), info['llm_info']['player'])
+
         for key, val in obs['unit'].items():
             if val['owner'] == info['my_player_id']:
                 unit_name = val['type_rule_name']
@@ -195,7 +197,9 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
 
     def regenerate_conflict_actions(self, observations, info):
         """Follow a similar logic of `make_decisions`."""
+
         print("Regenerating_conflict_actions")
+        print(self.chosen_actions.qsize(), self.current_deconflict_depth)
         # super().regenerate_conflict_actions(observations, info)
         self.handle_new_turn(observations, info)
         # threads = []

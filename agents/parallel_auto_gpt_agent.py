@@ -43,7 +43,6 @@ class ParallelAutoGPTAgent(LanguageAgent):
     def process_observations_and_info(self, observations, info):
         self.observations = observations
         self.info = info
-        print("SELF_NOW_HAS_INFO")
 
     def get_obs_input_prompt(self, ctrl_type, actor_name, actor_dict,
                              available_actions):
@@ -59,6 +58,10 @@ class ParallelAutoGPTAgent(LanguageAgent):
     def make_single_decision(self, ctrl_type, actor_id, actor_dict):
         worker = self.workers[(ctrl_type, actor_id)]
         actor_name = actor_dict['name']
+
+        if "keep activity" in actor_dict["available_actions"]:
+            actor_dict['available_actions'].remove("keep activity")
+
         available_actions = make_action_list_readable(
             actor_dict['available_actions'])
         obs_input_prompt = self.get_obs_input_prompt(ctrl_type, actor_name,

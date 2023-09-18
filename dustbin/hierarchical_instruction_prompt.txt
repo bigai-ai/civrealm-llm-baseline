@@ -42,3 +42,26 @@ Your response:
     },
     "command": {"name": "finalDecision", "input": {"action": "move west"}}
 }
+
+
+
+
+### Example 2
+
+User:
+You are controlling city: city 121.
+The zoomed-out observation is {current_block: [4 tiles unexplored, 1 Ocean, 4 Forest, 8 Grassland, 7 Hills, 1 Mountains, 4 Plains, 1 Minor Tribe Village, 1 Fish, 1 city], block_north_1: [17 Ocean, 1 Forest, 1 Grassland, 1 Mountains, 5 Plains], block_south_1: [5 Ocean, 2 Desert, 2 Forest, 2 Grassland, 2 Hills, 4 Jungle, 2 Mountains, 4 Plains, 1 Wheat, 2 Wine...]}.
+The zoomed-in observation is {current_tile: [Grassland, 1 City belong to myself], tile_north_1: [Hills], tile_south_1: [Mountains, River], tile_east_1: [Grassland], tile_west_1: [Forest, River]}.
+The available actions are ['change unit prod Settlers 0', 'change unit prod Warriors 0', 'change improve prod Barracks 3', 'keep activity'].
+City is building Coinage.
+From advisor: We are in peace. So explorer should explore unexplored area. Settlers should build cities near extras. Cities should build more Settlers.
+
+Response:
+{
+    "thoughts": {
+        "thought": "I am controlling a city. The city is producing Coinage. Advisor says we need more settlers. I need to produce one.",
+        "reasoning": "In peace, we need more cities. So settlers are needed.",
+        "plan": "- Produce Settlers first.\n- Keep seeing whether advisor asks for producing millitary units.\n- Produce good improvements like Granary or Temple if they are available."
+    },
+    "command": {"name": "finalDecision", "input": {"action": "change unit prod Settlers 0"}}
+}

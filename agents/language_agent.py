@@ -146,22 +146,21 @@ class LanguageAgent(BaseAgent):
         if self.is_new_turn:
             self.current_deconflict_depth = 0
             self.handle_new_turn(observations, info)
-            print(self.chosen_actions)
 
         while self.current_deconflict_depth < self.max_deconflict_depth:
             if self.chosen_actions.empty():
                 self.regenerate_conflict_actions(observations, info)
+                self.current_deconflict_depth += 1
             if self.chosen_actions.empty():
                 return None
             while not self.chosen_actions.empty():
                 action = self.chosen_actions.get()
                 if self.is_action_valid(info, action):
-                    print(action, tuple(action[:2]))
+
                     self.last_taken_actions[tuple(
                         action[:2])] = [action[2], self.turn]
                     return action
                 self.handle_conflict_actions(action)
-            self.current_deconflict_depth += 1
 
         return None
 

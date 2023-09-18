@@ -113,7 +113,7 @@ class BaseWorker(ABC):
     def choose_action(self,
                       input_prompt,
                       avail_action_list,
-                      interact_timeout=1200):
+                      interact_timeout=60):
         exec_action_name = None
         prompt_addition = ''
         start_time = time.time()
