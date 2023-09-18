@@ -1,0 +1,4 @@
+The <% ctrl_type %> is <% actor_name %>.
+The zoomed-out observation is <% zoom_out_obs %>. 
+The zoomed-in observation is <% zoom_in_obs %>. 
+The available actions are <% available_actions %>. You should choose one of these actions according to the above observations.

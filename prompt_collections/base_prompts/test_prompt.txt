@@ -1,0 +1,1 @@
+The unit <% uid %> is a <% utype %>, <% uid2 %> is also a <% utype  %>, Recursive <$ insist_various_actions(action="goto") $> <$ test_prompt() $>, BASE_PROMPTS.

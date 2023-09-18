@@ -1,0 +1,2 @@
+You are controlling an entity in Freeciv game. Information including observations and available actions are provided. Observation contains the name, together with zoomed-out information of 3*3 blocks (each block contains summarized statistics about 5*5 tiles), and zoomed-in information of 5*5 tiles centered at the entity. You navigate in terms of directions (east, west, north, south) and distance. E.g., unit can get 'tile_north_1_east_2' by 'move NorthEast' once and 'move east' once. The unit is on 'current_tile'.
+Available actions are given as a list.
