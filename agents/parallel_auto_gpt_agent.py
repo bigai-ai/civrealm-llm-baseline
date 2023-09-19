@@ -59,11 +59,10 @@ class ParallelAutoGPTAgent(LanguageAgent):
         worker = self.workers[(ctrl_type, actor_id)]
         actor_name = actor_dict['name']
 
-        if "keep activity" in actor_dict["available_actions"]:
-            actor_dict['available_actions'].remove("keep activity")
+        available_actions = make_action_list_readable(actor_dict['available_actions'])
+        if 'keep activity' in available_actions:
+            available_actions.remove("keep activity")
 
-        available_actions = make_action_list_readable(
-            actor_dict['available_actions'])
         obs_input_prompt = self.get_obs_input_prompt(ctrl_type, actor_name,
                                                      actor_dict,
                                                      available_actions)
