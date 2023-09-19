@@ -89,6 +89,18 @@ class LanguageAgent(BaseAgent):
         else:
             self.is_new_turn = False
 
+    def get_birth_death_entities(self, info):
+        birth_entities = {}
+        death_entities = {}
+        for entity_type in self.entities:
+            if entity_type in info['llm_info']:
+                new_entities_set = set(info['llm_info'][entity_type])
+                birth_entities[entity_type] = set(info['llm_info'][entity_type]) - self.entities[entity_type]
+                death_entities[entity_type] = self.entities[entity_type] - set(info['llm_info'][entity_type])
+                self.entities[entity_type] = new_entities_set
+        return birth_entities, death_entities
+
+    """
     def get_birth_death_entities(self, observations):
         birth_entities = {}
         death_entities = {}
@@ -100,6 +112,7 @@ class LanguageAgent(BaseAgent):
                 observations[entity_type])
             self.entities[entity_type] = new_entities_set
         return birth_entities, death_entities
+    """
 
     def handle_new_entities(self, birth_entities):
         for entity_type in birth_entities:
@@ -113,8 +126,7 @@ class LanguageAgent(BaseAgent):
 
     def handle_new_turn(self, observations, info):
         self.process_observations_and_info(observations, info)
-        birth_entities, death_entities = self.get_birth_death_entities(
-            observations)
+        birth_entities, death_entities = self.get_birth_death_entities(info)
         self.handle_new_entities(birth_entities)
         self.handle_dead_entities(death_entities)
 
