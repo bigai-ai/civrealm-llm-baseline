@@ -33,10 +33,11 @@ from langchain.llms import OpenAI, AzureOpenAI
 from langchain.chains.question_answering import load_qa_chain
 
 from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
-
+from freeciv_gym.freeciv.utils.language_agent_utility import MOVE_NAMES, INVERSE_MOVE_NAMES
 from agents.prompt_handlers.base_prompt_handler import BasePromptHandler
 
 from .base_worker import BaseWorker
+
 
 
 class AzureGPTWorker(BaseWorker):
@@ -140,12 +141,16 @@ class AzureGPTWorker(BaseWorker):
             return None, self.prompt_handler.insist_avail_action()
 
         self.taken_actions_list.append(command_input['action'])
+
+        for move_action, move_name in MOVE_NAMES.items():
+            if self.taken_actions_list_needs_update(move_name, 15, 4):
+                return None, self.prompt_handler.insist_various_actions(action=move_name)
+        """
         if self.taken_actions_list_needs_update('goto', 15, 4):
-            return None, self.prompt_handler.insist_various_actions(
-                action="goto")
-        if self.taken_actions_list_needs_update('keep_activity', 15, 0):
-            return None, self.prompt_handler.insist_various_actions(
-                action="keep_activity")
+            return None, self.prompt_handler.insist_various_actions(action="goto")
+        if self.taken_actions_list_needs_update('keep activity', 15, 0):
+            return None, self.prompt_handler.insist_various_actions(action="keep activity")
+        """
 
         return exec_action, ''
 
