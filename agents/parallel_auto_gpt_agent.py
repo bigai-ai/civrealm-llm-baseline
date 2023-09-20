@@ -26,8 +26,9 @@ from .workers import AzureGPTWorker
 class ParallelAutoGPTAgent(LanguageAgent):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.dialogue_dir = os.path.join(
-            os.getcwd(), 'agents/civ_autogpt/saved_dialogues/')
+        self.dialogue_dir = os.path.join(os.getcwd(), 'agents/civ_autogpt/saved_dialogues/')
+        if not os.path.exists(self.dialogue_dir):
+            os.makedirs(self.dialogue_dir)
 
     def initialize_workers(self):
         self.workers = {}

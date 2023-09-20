@@ -31,6 +31,8 @@ class AutoGPTAgent(LanguageAgent):
     def initialize_workers(self):
         self.workers = AzureGPTWorker()
         self.dialogue_dir = os.path.join(os.getcwd(), 'agents/civ_autogpt/saved_dialogues/')
+        if not os.path.exists(self.dialogue_dir):
+            os.makedirs(self.dialogue_dir)
 
     def add_entity(self, entity_type, entity_id):
         pass
