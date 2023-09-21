@@ -4,10 +4,10 @@ INDIVIDUAL_PROMPT_DEFAULT = True
 
 PROMPT_SOLUTIONS_DICT = {
     "vanilla": "civ_prompts",
-    "settlers": "test_prompts_01_settlers",
+    "Settlers": "test_prompts_01_settlers",
     # "city": "",
-    # "explorer": "",
-    # "worker": "",
+    "Explorer": "test_prompts_02_explorers",
+    "Workers": "test_prompts_03_workers",
     "_final": "civ_prompts",
     # all other entities, should be some "other_prompts"
 }

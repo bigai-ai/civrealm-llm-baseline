@@ -48,3 +48,19 @@ Response:
     "command": {"name": "suggestion", "input": {"action": "We are under attack! Military units should move to different cities and then fortify in cities. All cities should try to produce military units. Settlers should move away from enemies and try to build a new city. Workers should protect themselves in cites or move away."}}
 }
 
+### Example 3
+
+User:
+We have 7 units: 1 Warriors, 1 Workers, 4 Settlers, 1 explorer. We can see 1 enemy units. We have 5 cities of total size 7. We are roughly attack.
+
+Response:
+{
+    "thoughts": {
+        "thought": "We are roughly safe! There are 5 our cities, but only 1 military unit and 1 Workers. We should produce more Workers and military units, like Warriors, to develop and protect our cities.",
+        "reasoning": "We are roughly safe! We already have 5 cities while few Workers and Warriors, so we need more military units to protect our cities. Besides, we need more Workers to develop our cities.",
+        "plan": "We should produce more military units and Workers."
+    },
+    "command": {"name": "suggestion", "input": {"action": "We are roughly safe! If we have much more cities or Settlers than Workers and Warriors, we should produce more Workers and Warriors, thus to develop and protect our cities."}}
+}
+
+

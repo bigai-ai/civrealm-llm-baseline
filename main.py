@@ -33,7 +33,7 @@ def main():
     # env = gymnasium.make('freeciv/FreecivLLM-v0')
     # env = gymnasium.make('freeciv/FreecivMinitask-v0')
     env = LLMWrapper(env)
-    agent = HierarchicalGPTAgent(max_deconflict_depth=2)
+    agent = HierarchicalGPTAgent(max_deconflict_depth=1)
 
     observations, info = env.reset()
 

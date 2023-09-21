@@ -125,7 +125,7 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
             war_state = "We are under attack."
         elif city_num_enemy >= 3 and unit_num_enemy < munit_num_self:
             war_state = "We are attacking other players."
-        elif unit_num_enemy == 0 and city_num_enemy < 3:
+        elif unit_num_enemy == 0 and city_num_enemy < 4:
             war_state = "We are in peace."
         else:
             war_state = "We are roughly safe."
