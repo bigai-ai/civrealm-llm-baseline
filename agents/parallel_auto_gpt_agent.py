@@ -64,6 +64,9 @@ class ParallelAutoGPTAgent(LanguageAgent):
         if 'keep activity' in available_actions:
             available_actions.remove("keep activity")
 
+        if 'cancel order' in available_actions:
+            available_actions.remove("cancel order")
+
         obs_input_prompt = self.get_obs_input_prompt(ctrl_type, actor_name,
                                                      actor_dict,
                                                      available_actions)
