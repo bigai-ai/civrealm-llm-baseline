@@ -22,7 +22,7 @@ class MyLanguageAgent(LanguageAgent):
 
     def initialize_workers(self):
         pass
- 
+
     def add_entity(self, entity_type, entity_id):
         pass
 
@@ -43,6 +43,7 @@ from typing import final
 from queue import Queue
 
 from civrealm.agents.base_agent import BaseAgent
+
 
 
 class LanguageAgent(BaseAgent):
@@ -148,9 +149,6 @@ class LanguageAgent(BaseAgent):
     def is_action_valid(self, info, action):
         ctrl_type, actor_id, action_name = action
         action_dict = info['llm_info'][ctrl_type][actor_id]['available_actions']
-
-
-        print(info['llm_info'][ctrl_type][actor_id]["available_actions"])
 
         if action_name in action_dict:
             return action_name

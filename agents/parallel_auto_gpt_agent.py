@@ -63,7 +63,7 @@ class ParallelAutoGPTAgent(LanguageAgent):
         actor_name = actor_dict['name']
 
         available_actions = actor_dict['available_actions']
-        # make_action_list_readable(actor_dict['available_actions'])
+        producing = actor_dict['observations'].get('producing', 'NOTHING')
 
         if 'keep activity' in available_actions:
             available_actions.remove("keep activity")
@@ -79,8 +79,8 @@ class ParallelAutoGPTAgent(LanguageAgent):
                                                 available_actions)
         print(f'Action chosen for {actor_name}:', exec_action_name)
         # exec_action_name = get_action_from_readable_name(exec_action_name)
-        if exec_action_name:
-            # and exec_action_name != "keep activity":
+        if (exec_action_name
+            and exec_action_name != "produce "+producing):
             self.chosen_actions.put((ctrl_type, actor_id, exec_action_name))
 
         worker.save_dialogue_to_file(

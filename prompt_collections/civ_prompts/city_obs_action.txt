@@ -1,0 +1,7 @@
+You are controlling <% ctrl_type %>: <% actor_name %>.
+The zoomed-out observation is <% zoom_out_obs %>.
+The zoomed-in observation is <% zoom_in_obs %>.
+This city is producing <% producing %>.
+The available actions are <% available_actions %>.
+You should choose one of these actions according to the above observations.
+Message from advisor: <% general_advise %>

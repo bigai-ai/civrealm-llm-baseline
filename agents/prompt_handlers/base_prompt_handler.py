@@ -21,6 +21,7 @@ J. Wang
 
 import os
 import re
+import copy
 from civrealm.freeciv.utils.freeciv_logging import fc_logger
 
 print(os.getcwd())
@@ -108,9 +109,10 @@ class BasePromptHandler:
             variables = set(re.findall("(<%[ ]+(.*?)[ ]+%>)", raw))
             recursions = set(re.findall(r"(<\$[ ]+(.*?)[ ]+\$>)", raw))
 
+            out = copy.deepcopy(raw)
             for pattern, key in variables:
                 try:
-                    raw = raw.replace(pattern, str(kwargs[key]))
+                    out = out.replace(pattern, str(kwargs[key]))
                     # I decide not to use `kwargs.get(key, "")` in order to
                     # log the incidents when key is not provided in args.
                 except KeyError as einfo:
@@ -121,7 +123,7 @@ class BasePromptHandler:
                           f" in generating {template_name}.")
                     if _raise_empty:
                         raise
-                    raw = raw.replace(pattern, "")
+                    out = out.replace(pattern, "")
             for pattern, key in recursions:
                 try:
                     func_end = key.find("(")
@@ -137,7 +139,7 @@ class BasePromptHandler:
                     replace = eval("self." + key)
 
                     print(replace)
-                    raw = raw.replace(pattern, replace)
+                    out = out.replace(pattern, replace)
                 except Exception as einfo:
                     fc_logger.error(f"Failed to load submodule {key}" +
                                     f" in generating {template_name}.")
@@ -147,8 +149,8 @@ class BasePromptHandler:
                     print(einfo)
                     if _raise_empty:
                         raise
-                    raw = raw.replace(pattern, "")
-            return raw
+                    out = out.replace(pattern, "")
+            return out
 
         return parser
 

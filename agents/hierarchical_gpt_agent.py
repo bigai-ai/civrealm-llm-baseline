@@ -53,31 +53,6 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
             actor_id=entity_id,
             prompt_prefix=prompt_prefix)
 
-    def get_obs_input_prompt(self, ctrl_type, actor_name, actor_dict,
-                             available_actions):
-
-        zoom_in_obs = actor_dict['observations']['minimap']
-        zoom_out_obs = actor_dict['observations']['upper_map']
-        
-        # available_actions.remove("keep activity")
-        # if ctrl_type == "city":
-
-        #     current_prod = "The city is building "
-        #     kind = self.observations['city'][int(
-        #         actor_name.split()[-1])]['production_kind'] // 3 - 1
-        #     print("CITY", actor_name, kind)
-        #     current_prod += f"{PROD_KINDS[kind]}"
-        #     current_prod += f"{PROD_REF[self.observations['city'][int(actor_name.split()[-1])]['production_value']]}"
-        #     available_actions += ["keep activity"]
-        # else:
-        #     current_prod = ""   # used in prompt
-
-        return f'''You are controlling {ctrl_type}: {actor_name}.
-        The zoomed-out observation is {zoom_out_obs}.
-        The zoomed-in observation is {zoom_in_obs}.
-        The available actions are {available_actions}. 
-        You should choose one of these actions according to the above observations.
-        Message from advisor: {self.general_advise}'''
 
     def get_advisor_input_prompt(self, obs, info):
         """
@@ -141,6 +116,40 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
         ])
         return return_prompt
 
+    def get_obs_input_prompt(self, ctrl_type, actor_name, actor_dict,
+                             available_actions):
+        zoom_in_obs = actor_dict['observations']['minimap']
+        zoom_out_obs = actor_dict['observations']['upper_map']
+        system_message = self.info['llm_info'].get("message", "")
+        system_message = ("Game scenario message is: "
+                          if system_message else "") + system_message
+        prompt = ""
+
+        if ctrl_type == "city":
+            producing = actor_dict['observations']['producing']
+            available_actions += ['produce '+producing]
+
+            prompt = self.strategy_maker.prompt_handler.city_obs_action(
+                actor_name=actor_name,
+                ctrl_type=ctrl_type,
+                zoom_out_obs=zoom_out_obs,
+                zoom_in_obs=zoom_in_obs,
+                producint=producing,
+                available_actions=available_actions,
+                general_advise=self.general_advise
+            )
+        elif ctrl_type == "unit":
+            prompt = self.strategy_maker.prompt_handler.unit_obs_action(
+                actor_name=actor_name,
+                ctrl_type=ctrl_type,
+                zoom_out_obs=zoom_out_obs,
+                zoom_in_obs=zoom_in_obs,
+                available_actions=available_actions,
+                general_advise=self.general_advise
+            )
+        return prompt
+
+
     def generate_general_advise(self):
         """
         Generate general advise for all other workers.
@@ -202,16 +211,4 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
         print(self.chosen_actions.qsize(), self.current_deconflict_depth)
         # super().regenerate_conflict_actions(observations, info)
         self.handle_new_turn(observations, info)
-        # threads = []
-        # args_list = [(action[0], action[1],
-        #               info['llm_info'][action[0]][action[1]])
-        #              for action in self.conflict_action_list]
-        # for args in args_list:
-        #     thread = threading.Thread(target=self.make_single_decision,
-        #                               args=args)
-        #     threads += [thread]
-        #     thread.start()
 
-        # self.conflict_action_list = []
-        # for thread in threads:
-        #     thread.join()

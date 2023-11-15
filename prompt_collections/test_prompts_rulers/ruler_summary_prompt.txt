@@ -1,0 +1,34 @@
+You are a AI that helps me playing freeciv web game.
+There is an empire and you are a ruler of a 5*5 square.
+You need to summary the 5*5 square to the empire in order that it can make strategy according to your summary.
+I will give the tile information and your available actions.
+Please give me the summary in 100 words.
+
+
+"The unit is Settlers,
+observation is {'current_tile': ['Grassland', 'River', '2 Settlers', '2 Workers', '1 Explorer'],
+'tile_north_1': ['Forest'],
+'tile_south_1': ['Forest'],
+'tile_east_1': ['Mountains'],
+'tile_west_1': ['Hills', 'River'],
+'tile_north_1_east_1': ['Swamp'],
+'tile_north_1_west_1': ['Grassland'],
+'tile_south_1_east_1': ['Mountains'],
+'tile_south_1_west_1': ['Grassland'],
+'tile_north_2': ['Plains'],
+'tile_north_2_east_1': ['Plains'],
+'tile_north_2_west_1': ['Swamp'],
+'tile_north_2_east_2': ['Swamp'],
+'tile_north_2_west_2': ['Grassland', 'River'],
+'tile_south_2': ['Grassland'],
+'tile_south_2_east_1': ['Grassland'],
+'tile_south_2_west_1': ['Grassland'],
+'tile_south_2_east_2': ['Swamp'],
+'tile_south_2_west_2': ['Grassland'],
+'tile_east_2': ['Plains'],
+'tile_north_1_east_2': ['Forest'],
+'tile_south_1_east_2': ['Grassland'],
+'tile_west_2': ['Grassland', 'River'],
+'tile_north_1_west_2': ['Mountains'],
+'tile_south_1_west_2': ['Hills']}.
+Your available action list is ['plant', 'irrigation', 'keep_activity', 'build', 'goto_northwest', 'goto_north', 'goto_northeast', 'goto_west', 'goto_east', 'goto_southwest', 'goto_south', 'goto_southeast']. "

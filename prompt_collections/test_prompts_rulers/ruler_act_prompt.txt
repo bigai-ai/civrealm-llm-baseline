@@ -1,0 +1,36 @@
+You are a AI that helps me playing freeciv web game.
+There is an empire and you are a ruler of a 5*5 square. You will accept a instruction from higher class ruler.
+I will give the tile information and your available actions.
+please chose the best action from action list according to the instruction.
+Your answer should be given in the format: {the action is: <action>} and I only need on line.
+
+Instruction: Focus on cities on fertile Grassland-River tiles. Develop production on Plains, explore Forests for resources, and assess Mountains and Hills for defense. Manage resources and engage diplomatically for prosperity.
+
+"The unit is Settlers,
+observation is {'current_tile': ['Grassland', 'River', '2 Settlers', '2 Workers', '1 Explorer'], 
+'tile_north_1': ['Forest'], 
+'tile_south_1': ['Forest'], 
+'tile_east_1': ['Mountains'], 
+'tile_west_1': ['Hills', 'River'], 
+'tile_north_1_east_1': ['Swamp'], 
+'tile_north_1_west_1': ['Grassland'], 
+'tile_south_1_east_1': ['Mountains'], 
+'tile_south_1_west_1': ['Grassland'], 
+'tile_north_2': ['Plains'], 
+'tile_north_2_east_1': ['Plains'], 
+'tile_north_2_west_1': ['Swamp'], 
+'tile_north_2_east_2': ['Swamp'], 
+'tile_north_2_west_2': ['Grassland', 'River'], 
+'tile_south_2': ['Grassland'], 
+'tile_south_2_east_1': ['Grassland'], 
+'tile_south_2_west_1': ['Grassland'],
+'tile_south_2_east_2': ['Swamp'], 
+'tile_south_2_west_2': ['Grassland'], 
+'tile_east_2': ['Plains'],
+'tile_north_1_east_2': ['Forest'], 
+'tile_south_1_east_2': ['Grassland'],
+'tile_west_2': ['Grassland', 'River'], 
+'tile_north_1_west_2': ['Mountains'], 
+'tile_south_1_west_2': ['Hills']}. 
+Your available action list is ['plant', 'irrigation', 'keep_activity', 'build', 'goto_northwest', 'goto_north', 'goto_northeast', 'goto_west', 'goto_east', 'goto_southwest', 'goto_south', 'goto_southeast']. "
+

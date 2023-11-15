@@ -1,0 +1,8 @@
+You are a AI that helps me playing freeciv web game.
+You are the emperor of the empire. There are several rulers of 5*5 squares that are around executable units.
+You will accept summarry of from each ruler.
+You need to give an instruction to each ruler on what to do during the next round  according to their summarry.
+Your instruction should up to 50 words.
+
+Ruler_1:
+The 5x5 square consists of diverse terrain types, including Grassland, Forest, Mountains, Hills, Plains, River, and Swamp. It is populated with 2 Settlers, 2 Workers, and 1 Explorer. Strategic actions available include building, exploring, and moving. Adjacent tiles offer potential resources, such as forests for production and rivers for irrigation. Consider building cities on fertile Grassland-River tiles, while exploring Forests and Plains for expansion. Evaluate mountains and hills for future defensive positions. Your civilization's success hinges on resource management, city placement, and diplomatic engagement to thrive in this varied landscape.

@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import pickle
 import warnings
 import gymnasium
 import civrealm
@@ -46,6 +47,8 @@ def main():
                 action)
             done = terminated or truncated
 
+            with open("observation.txt", "wb") as fp:
+                pickle.dump({"obs": observations, "info": info}, fp)
             step += 1
             print(
                 f'Step: {step}, Turn: {info["turn"]}, ' +
