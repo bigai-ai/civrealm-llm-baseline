@@ -15,11 +15,11 @@
 
 import warnings
 import gymnasium
-import freeciv_gym
+import civrealm
 from agents import BaselineLanguageAgent, AutoGPTAgent, ParallelAutoGPTAgent, HierarchicalGPTAgent
-from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
-from freeciv_gym.configs import fc_args
-from freeciv_gym.envs.freeciv_wrapper.llm_wrapper import LLMWrapper
+from civrealm.freeciv.utils.freeciv_logging import fc_logger
+from civrealm.configs import fc_args
+from civrealm.envs.freeciv_wrapper.llm_wrapper import LLMWrapper
 
 # FIXME: This is a hack to suppress the warning about the gymnasium spaces. Currently Gymnasium does not support hierarchical actions.
 warnings.filterwarnings('ignore',
@@ -27,7 +27,7 @@ warnings.filterwarnings('ignore',
 
 
 def main():
-    env = gymnasium.make('freeciv/FreecivLLMWrapper-v0')
+    env = gymnasium.make('freeciv/FreecivBase-v0')
     # agent = BaselineLanguageAgent()
 
     # env = gymnasium.make('freeciv/FreecivLLM-v0')
@@ -48,7 +48,9 @@ def main():
 
             step += 1
             print(
-                f'Step: {step}, Turn: {info["turn"]}, Reward: {reward}, Terminated: {terminated}, Truncated: {truncated}'
+                f'Step: {step}, Turn: {info["turn"]}, ' +
+                f'Reward: {reward}, Terminated: {terminated}, ' +
+                f'Truncated: {truncated}'
             )
         except Exception as e:
             fc_logger.error(repr(e))

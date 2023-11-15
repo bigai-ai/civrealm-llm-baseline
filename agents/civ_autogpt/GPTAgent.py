@@ -6,7 +6,7 @@ import json
 import requests
 import warnings
 
-from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
+from civrealm.freeciv.utils.freeciv_logging import fc_logger
 from .utils import num_tokens_from_messages, send_message_to_llama, send_message_to_vicuna, extract_json, send_message_to_llama, TOKEN_LIMIT_TABLE
 from langchain.chat_models import ChatOpenAI, AzureChatOpenAI
 from langchain.chains import ConversationChain

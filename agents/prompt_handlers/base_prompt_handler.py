@@ -21,7 +21,7 @@ J. Wang
 
 import os
 import re
-from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
+from civrealm.freeciv.utils.freeciv_logging import fc_logger
 
 print(os.getcwd())
 PROMPT_ROOT_DIR = "./prompt_collections/"

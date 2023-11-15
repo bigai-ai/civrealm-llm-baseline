@@ -32,7 +32,7 @@ from langchain.vectorstores import Pinecone
 from langchain.llms import OpenAI, AzureOpenAI
 from langchain.chains.question_answering import load_qa_chain
 
-from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
+from civrealm.freeciv.utils.freeciv_logging import fc_logger
 
 from agents.prompt_handlers.base_prompt_handler import BasePromptHandler
 

@@ -17,8 +17,8 @@
 
 import os
 import time
-from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
-from freeciv_gym.freeciv.utils.language_agent_utility import make_action_list_readable, get_action_from_readable_name
+from civrealm.freeciv.utils.freeciv_logging import fc_logger
+from civrealm.freeciv.utils.language_agent_utility import make_action_list_readable, get_action_from_readable_name
 
 from .language_agent import LanguageAgent
 from .workers import AzureGPTWorker
@@ -49,11 +49,12 @@ class AutoGPTAgent(LanguageAgent):
             for actor_id, actor_dict in self.info['llm_info'][ctrl_type].items():
                 actor_name = actor_dict['name']
                 current_unit_obs = actor_dict['observations']['minimap']
-                available_actions = make_action_list_readable(actor_dict['available_actions'])
+                # available_actions = make_action_list_readable(actor_dict['available_actions'])
+                available_actions = actor_dict['available_actions']
                 obs_input_prompt = f'The {ctrl_type} is {actor_name}, observation is {current_unit_obs}. Your available action list is {available_actions}. '
                 print(f'Current {ctrl_type}: {actor_name}')
                 exec_action_name = self.workers.choose_action(obs_input_prompt, available_actions)
-                exec_action_name = get_action_from_readable_name(exec_action_name)
+                # exec_action_name = get_action_from_readable_name(exec_action_name)
                 print('Action chosen:', exec_action_name)
                 if exec_action_name:
                     self.chosen_actions.put((ctrl_type, actor_id, exec_action_name))

@@ -17,11 +17,17 @@ import random
 import time
 import json
 import os
-from freeciv_gym.agents.base_agent import BaseAgent
-from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
-from freeciv_gym.freeciv.utils.language_agent_utility import MOVE_NAMES, INVERSE_MOVE_NAMES
-from freeciv_gym.configs import fc_args
+from civrealm.agents.base_agent import BaseAgent
+from civrealm.freeciv.utils.freeciv_logging import fc_logger
+# from civrealm.freeciv.utils.language_agent_utility import MOVE_NAMES, INVERSE_MOVE_NAMES
+from civrealm.configs import fc_args
 from agents.civ_autogpt import GPTAgent
+
+
+MOVE_NAMES = {'goto_0': 'move_NorthWest', 'goto_1': 'move_North', 'goto_2': 'move_NorthEast',
+              'goto_3': 'move_West', 'goto_4': 'move_East', 'goto_5': 'move_SouthWest',
+              'goto_6': 'move_South', 'goto_7': 'move_SouthEast'}
+INVERSE_MOVE_NAMES = {val: key for key, val in MOVE_NAMES.items()}
 
 
 class BaselineLanguageAgent(BaseAgent):
@@ -84,11 +90,12 @@ class BaselineLanguageAgent(BaseAgent):
                 current_unit_obs = info['llm_info'][ctrl_type][valid_actor_id]
                 fc_logger.debug(f'current unit obs: {current_unit_obs}')
 
-                current_avail_actions_list = [
-                    MOVE_NAMES[action_name]
-                    if action_name in MOVE_NAMES.keys() else action_name
-                    for action_name in valid_action_list
-                ]
+                # current_avail_actions_list = [
+                #     MOVE_NAMES[action_name]
+                #     if action_name in MOVE_NAMES.keys() else action_name
+                #     for action_name in valid_action_list
+                # ]
+                current_avail_actions_list = valid_action_list
 
                 obs_input_prompt = f"""The unit is {current_unit_name}, observation is {current_unit_obs}. Your available action list is {current_avail_actions_list}. """
                 print('current unit:', current_unit_name, '; unit id:',
@@ -98,10 +105,10 @@ class BaselineLanguageAgent(BaseAgent):
                     obs_input_prompt, current_unit_name,
                     current_avail_actions_list)
 
-                try:
-                    exec_action_name = INVERSE_MOVE_NAMES[exec_action_name]
-                except:
-                    pass
+                # try:
+                #     exec_action_name = INVERSE_MOVE_NAMES[exec_action_name]
+                # except:
+                #     pass
                 if exec_action_name:
                     return (ctrl_type, valid_actor_id, exec_action_name)
 

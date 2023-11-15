@@ -32,12 +32,16 @@ from langchain.vectorstores import Pinecone
 from langchain.llms import OpenAI, AzureOpenAI
 from langchain.chains.question_answering import load_qa_chain
 
-from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
-from freeciv_gym.freeciv.utils.language_agent_utility import MOVE_NAMES, INVERSE_MOVE_NAMES
+from civrealm.freeciv.utils.freeciv_logging import fc_logger
+# from civrealm.freeciv.utils.language_agent_utility import MOVE_NAMES, INVERSE_MOVE_NAMES
 from agents.prompt_handlers.base_prompt_handler import BasePromptHandler
 
 from .base_worker import BaseWorker
 
+MOVE_NAMES = {'goto_0': 'move_NorthWest', 'goto_1': 'move_North', 'goto_2': 'move_NorthEast',
+              'goto_3': 'move_West', 'goto_4': 'move_East', 'goto_5': 'move_SouthWest',
+              'goto_6': 'move_South', 'goto_7': 'move_SouthEast'}
+INVERSE_MOVE_NAMES = {val: key for key, val in MOVE_NAMES.items()}
 
 
 class AzureGPTWorker(BaseWorker):
@@ -80,8 +84,9 @@ class AzureGPTWorker(BaseWorker):
     def init_index(self):
         pinecone.init(api_key=os.environ["MY_PINECONE_API_KEY"],
                       environment=os.environ["MY_PINECONE_ENV"])
+        # print(os.environ)
         self.index = Pinecone.from_existing_index(
-            index_name='langchain-demo',
+            index_name='civrealm-mastaba',
             embedding=OpenAIEmbeddings(model="text-embedding-ada-002"))
 
     def _load_instruction_prompt(self):
@@ -157,10 +162,13 @@ class AzureGPTWorker(BaseWorker):
     def query_llm(self, stop=None, temperature=0.7, top_p=0.95):
         fc_logger.debug(f'Querying with dialogue: {self.dialogue}')
         assert openai.api_type == 'azure'
+
         return openai.ChatCompletion.create(deployment_id=self.deployment_name,
                                             model=self.model,
                                             messages=self.dialogue,
                                             request_timeout=10)
+
+
 
     def generate_command(self, prompt: str):
         self.add_user_message_to_dialogue(prompt +

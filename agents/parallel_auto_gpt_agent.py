@@ -17,11 +17,13 @@ import os
 import time
 import threading
 
-from freeciv_gym.freeciv.utils.language_agent_utility import make_action_list_readable, get_action_from_readable_name
+from civrealm.freeciv.utils.language_agent_utility import make_action_list_readable, get_action_from_readable_name
 
 from .language_agent import LanguageAgent
 from .workers import AzureGPTWorker
 
+
+# Wrong Interpretation of action names. Goto Yexin to fix it.
 
 class ParallelAutoGPTAgent(LanguageAgent):
     def __init__(self, **kwargs):
@@ -60,7 +62,9 @@ class ParallelAutoGPTAgent(LanguageAgent):
         worker = self.workers[(ctrl_type, actor_id)]
         actor_name = actor_dict['name']
 
-        available_actions = make_action_list_readable(actor_dict['available_actions'])
+        available_actions = actor_dict['available_actions']
+        # make_action_list_readable(actor_dict['available_actions'])
+
         if 'keep activity' in available_actions:
             available_actions.remove("keep activity")
 
@@ -74,7 +78,7 @@ class ParallelAutoGPTAgent(LanguageAgent):
         exec_action_name = worker.choose_action(obs_input_prompt,
                                                 available_actions)
         print(f'Action chosen for {actor_name}:', exec_action_name)
-        exec_action_name = get_action_from_readable_name(exec_action_name)
+        # exec_action_name = get_action_from_readable_name(exec_action_name)
         if exec_action_name:
             # and exec_action_name != "keep activity":
             self.chosen_actions.put((ctrl_type, actor_id, exec_action_name))

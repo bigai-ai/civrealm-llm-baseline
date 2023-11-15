@@ -1,4 +1,4 @@
-# Copyright (C) 2023  The Freeciv-gym project
+# Copyright (C) 2023  The CivRealm project
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
@@ -13,11 +13,6 @@
 # You should have received a copy of the GNU General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from abc import ABC, abstractmethod
-from typing import final
-from queue import Queue
-
-from freeciv_gym.agents.base_agent import BaseAgent
 """
 The following is a template to create a language agent by inheriting from LanguageAgent.
 
@@ -27,7 +22,7 @@ class MyLanguageAgent(LanguageAgent):
 
     def initialize_workers(self):
         pass
-    
+ 
     def add_entity(self, entity_type, entity_id):
         pass
 
@@ -41,6 +36,13 @@ class MyLanguageAgent(LanguageAgent):
         pass
 
 """
+
+
+from abc import ABC, abstractmethod
+from typing import final
+from queue import Queue
+
+from civrealm.agents.base_agent import BaseAgent
 
 
 class LanguageAgent(BaseAgent):
@@ -145,10 +147,13 @@ class LanguageAgent(BaseAgent):
 
     def is_action_valid(self, info, action):
         ctrl_type, actor_id, action_name = action
-        action_dict = info['available_actions'][ctrl_type]
+        action_dict = info['llm_info'][ctrl_type][actor_id]['available_actions']
 
-        if action_name in action_dict[actor_id]:
-            return action_dict[actor_id][action_name]
+
+        print(info['llm_info'][ctrl_type][actor_id]["available_actions"])
+
+        if action_name in action_dict:
+            return action_name
 
         return False
 
@@ -168,18 +173,9 @@ class LanguageAgent(BaseAgent):
             while not self.chosen_actions.empty():
                 action = self.chosen_actions.get()
                 if self.is_action_valid(info, action):
-
                     self.last_taken_actions[tuple(
                         action[:2])] = [action[2], self.turn]
                     return action
                 self.handle_conflict_actions(action)
 
         return None
-
-        # if not self.chosen_actions.empty():
-        #     action = self.chosen_actions.get()
-        #     while not self.is_action_valid(info, action):
-        #         action = self.chosen_actions.get()
-        #     return action
-        # else:
-        #     return None

@@ -22,7 +22,7 @@ from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
 from langchain.memory import ConversationSummaryBufferMemory
 from langchain.vectorstores import Pinecone
 
-from freeciv_gym.freeciv.utils.freeciv_logging import fc_logger
+from civrealm.freeciv.utils.freeciv_logging import fc_logger
 from ..civ_autogpt.utils import num_tokens_from_messages, extract_json, TOKEN_LIMIT_TABLE
 
 
@@ -122,9 +122,11 @@ class BaseWorker(ABC):
                 try:
                     response = self.generate_command(input_prompt +
                                                      prompt_addition)
+
                     exec_action_name, prompt_addition = self.process_command(
                         response, input_prompt, avail_action_list)
                     self.dialogue += [response['choices'][0]['message']]
+
                 except Exception as e:
                     fc_logger.error(f'Error when choosing action: {str(e)}')
                     fc_logger.error(f'input_prompt: {input_prompt}')
