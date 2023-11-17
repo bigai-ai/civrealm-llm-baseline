@@ -25,7 +25,7 @@ from .workers import AzureGPTWorker
 
 # Wrong Interpretation of action names. Goto Yexin to fix it.
 
-class ParallelAutoGPTAgent(LanguageAgent):
+class BaseLangAgent(LanguageAgent):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.dialogue_dir = os.path.join(os.getcwd(), 'agents/civ_autogpt/saved_dialogues/')

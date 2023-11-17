@@ -1,4 +1,4 @@
-# Configuration mainly for the HierarchicalGPT Solution
+# Configuration mainly for the MastabaAgent Solution
 
 INDIVIDUAL_PROMPT_DEFAULT = True
 

@@ -16,7 +16,7 @@
 from .gpt_worker import AzureGPTWorker
 
 
-class HierarchicalGPTWorker(AzureGPTWorker):
+class MastabaWorker(AzureGPTWorker):
     def __init__(self, role="controller", **kwargs):
         self.role = role
         super().__init__(**kwargs)

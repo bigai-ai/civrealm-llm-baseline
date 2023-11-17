@@ -17,7 +17,7 @@ import pickle
 import warnings
 import gymnasium
 import civrealm
-from agents import BaselineLanguageAgent, AutoGPTAgent, ParallelAutoGPTAgent, HierarchicalGPTAgent
+from agents import BaselineLanguageAgent, AutoGPTAgent, BaseLangAgent, MastabaAgent
 from civrealm.freeciv.utils.freeciv_logging import fc_logger
 from civrealm.configs import fc_args
 from civrealm.envs.freeciv_wrapper.llm_wrapper import LLMWrapper
@@ -34,7 +34,7 @@ def main():
     # env = gymnasium.make('freeciv/FreecivLLM-v0')
     # env = gymnasium.make('freeciv/FreecivMinitask-v0')
     env = LLMWrapper(env)
-    agent = HierarchicalGPTAgent(max_deconflict_depth=3)
+    agent = MastabaAgent(max_deconflict_depth=3)
 
     observations, info = env.reset()
 

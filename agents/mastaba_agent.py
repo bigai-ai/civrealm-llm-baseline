@@ -17,8 +17,8 @@ import pickle
 import os
 import time
 import threading
-from .parallel_auto_gpt_agent import ParallelAutoGPTAgent
-from .workers import HierarchicalGPTWorker
+from .parallel_auto_gpt_agent import BaseLangAgent
+from .workers import MastabaWorker
 from agents.redundants.improvement_consts import UNIT_TYPES, IMPR_TYPES
 from config import INDIVIDUAL_PROMPT_DEFAULT, PROMPT_SOLUTIONS
 
@@ -26,7 +26,7 @@ PROD_KINDS = ["improvement", "unit"]
 PROD_REF = IMPR_TYPES + UNIT_TYPES
 
 
-class HierarchicalGPTAgent(ParallelAutoGPTAgent):
+class MastabaAgent(BaseLangAgent):
     def __init__(
             self,
             use_entity_individual_prompt: bool = INDIVIDUAL_PROMPT_DEFAULT,
@@ -36,7 +36,7 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
         self.general_advise = ""
 
     def initialize_workers(self):
-        self.strategy_maker = HierarchicalGPTWorker(role="advisor")
+        self.strategy_maker = MastabaWorker(role="advisor")
         self.workers = {}
 
     def add_entity(self, entity_type, entity_id):
@@ -48,7 +48,7 @@ class HierarchicalGPTAgent(ParallelAutoGPTAgent):
             prompt_prefix = PROMPT_SOLUTIONS[name]
         else:
             prompt_prefix = PROMPT_SOLUTIONS['vanilla']
-        self.workers[(entity_type, entity_id)] = HierarchicalGPTWorker(
+        self.workers[(entity_type, entity_id)] = MastabaWorker(
             ctrl_type=entity_type,
             actor_id=entity_id,
             prompt_prefix=prompt_prefix)
