@@ -36,7 +36,7 @@ User:
 You are controlling unit: Settlers 103.
 The zoomed-out observation is {current_block: [4 tiles unexplored, 1 Ocean, 4 Forest, 8 Grassland, 7 Hills, 1 Mountains, 4 Plains, 1 Minor Tribe Village, 1 Fish, 1 city], block_north_1: [17 Ocean, 1 Forest, 1 Grassland, 1 Mountains, 5 Plains], block_south_1: [5 Ocean, 2 Desert, 2 Forest, 2 Grassland, 2 Hills, 4 Jungle, 2 Mountains, 4 Plains, 1 Wheat, 2 Wine], ...}.
 The zoomed-in observation is {current_tile: [1 Grassland, 1 City belong to myself], tile_north_1: [1 Hills], tile_south_1: [1 Plain, 1 River], tile_east_1: [1 Grassland], tile_west_1: [1 Forest, 1 River], ...}.
-The available actions are [join city,  move north, move south, move west, move east, irrigate].
+The available actions are [join city,  move North, move South, move West, move East, irrigate].
 From advisor: We are in peace. So explorer should explore unexplored area. Settlers should build cities near extras. Cities should build more Settlers.
 
 Response:
@@ -68,7 +68,7 @@ User:
 You are controlling unit: Settlers 104.
 The zoomed-out observation is {current_block: [4 tiles unexplored, 4 Forest, 6 Grassland, 6 Plains, 7 River, 1 Wheat, 1 Settlers, unit owners are: myself player_0], block_north_1: [22 tiles unexplored, 1 Forest, 1 Hills, 1 Plains, 1 River, 1 Wine], block_south_1: [10 tiles unexplored, 5 Ocean, 2 Forest, 4 Plains, 4 River], ...}.
 The zoomed-in observation is {current_tile: [1 Plains, 1 River, 1 Wheat, 1 Settlers, unit owners are: myself player_0], tile_north_1: [1 Plains, 1 River], tile_south_1: [1 Grassland], tile_east_1: [1 Grassland, 1 River], tile_west_1: [1 Hills], ...}.
-The available actions are [build city, join city,  move north, move south, move west, move east, irrigate].
+The available actions are [build city, join city,  move North, move South, move West, move East, irrigate].
 From advisor: We are in peace. So explorer should explore unexplored area. Settlers should build cities near extras. Cities should build more Settlers.
 
 Response:
@@ -88,7 +88,7 @@ User:
 You are controlling unit: Settlers 105.
 The zoomed-out observation is {current_block: [12 tiles unexplored, 2 Ocean, 3 Forest, 5 Grassland, 1 Desert, 1 Wheat, 1 Settlers, unit owners are: myself player_0], block_north_1: [24 tiles unexplored, 1 Grassland], block_south_1: [25 tiles unexplored, 4 Swamp], ...}.
 The zoomed-in observation is {current_tile: [1 Desert, 1 Settlers, unit owners are: myself player_0], tile_north_1: [1 Grassland], tile_south_1: [1 Swamp], tile_east_1: [1 Forest], tile_west_1: [1 Forest, 1 River, 1 Wine], ...}.
-The available actions are [build city, join city,  move north, move south, move west, move east, irrigate].
+The available actions are [build city, join city,  move North, move South, move West, move East, irrigate].
 From advisor: We are in peace. So explorer should explore unexplored area. Settlers should build cities near extras. Cities should build more Settlers.
 
 Response:

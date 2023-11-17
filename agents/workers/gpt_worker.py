@@ -136,7 +136,8 @@ class AzureGPTWorker(BaseWorker):
     def handle_command_final_decision(self, command_input, obs_input_prompt,
                                       current_avail_actions):
         exec_action = command_input['action']
-        if exec_action not in current_avail_actions:
+        current_avail_actions = [x.lower() for x in current_avail_actions]
+        if exec_action.lower() not in current_avail_actions:
             print(
                 f'{self.name}\'s chosen action "{exec_action}" not in the available action list, available actions are {current_avail_actions}, retrying...'
             )

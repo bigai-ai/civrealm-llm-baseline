@@ -36,14 +36,14 @@ User:
 You are controlling unit: Workers 135.
 The zoomed-out observation is {current_block: [6 tiles unexplored, 4 Ocean, 2 Grassland, 7 Hills, 3 Mountains, 2 Plains, 3 River, 1 Workers, unit owners are: myself player_0], block_north_1: [25 tiles unexplored], block_south_1: [10 tiles unexplored, 2 Forest, 3 Grassland, 4 Hills, 1 Settlers, unit owners are: myself player_0], ...}.
 The zoomed-in observation is {current_tile: [1 Hills, 1 Workers, unit owners are: myself player_0], tile_north_1: [1 Grassland], tile_south_1: [1 Hills], tile_east_1: [1 Mountains], tile_west_1: [1 Plains], ...}.
-The available actions are [mine, keep_activity, build_road, move north, move south, move west].
+The available actions are [mine, keep_activity, build_road, move North, move South, move West].
 From advisor: We are in peace. So explorer should explore unexplored area. Settlers should build cities near extras. Cities should build more Settlers.
 
 Response:
 {
     "thoughts": {
         "thought": "I am controlling Workers 135. If there is no road on my tile, I should build road. If there is Wheat, I should irrigate.",
-        "review": Available actions are [mine, keep activity, build_road, move north, move south, move west],
+        "review": Available actions are [mine, keep activity, build_road, move North, move South, move West],
         "reasoning": "I should choose a tile to build extras. Because there is no road on my tile, I should build road here.",
         "plan": "Workers should build road because there is no road on the current tile."
     },
@@ -56,14 +56,14 @@ User:
 You are controlling unit: Workers 137.
 The zoomed-out observation is {current_block: [6 tiles unexplored, 4 Ocean, 2 Grassland, 7 Hills, 1 Road, 2 Wheat, 3 River, 1 Workers, unit owners are: myself player_0], block_north_1: [25 tiles unexplored], block_south_1: [10 tiles unexplored, 2 Forest, 3 Grassland, 4 Hills, 1 Settlers, unit owners are: myself player_0], ...}.
 The zoomed-in observation is {current_tile: [1 Hills, 1 Road, 1 Wheat, 1 Workers, unit owners are: myself player_0], tile_north_1: [1 Grassland], tile_south_1: [1 Hills], tile_east_1: [1 Mountains], tile_west_1: [1 Plains], ...}.
-The available actions are [mine, keep_activity, build_road, move north, move south, move west].
+The available actions are [mine, keep_activity, build_road, move North, move South, move West].
 From advisor: We are in peace. So explorer should explore unexplored area. Settlers should build cities near extras. Cities should build more Settlers.
 
 Response:
 {
     "thoughts": {
         "thought": "I am controlling Workers 137. If there is no road on my tile, I should build road. If there is Wheat, I should irrigate.",
-        "review": Available actions are [mine, keep activity, irrigate, move north, move south, move west],
+        "review": Available actions are [mine, keep activity, irrigate, move North, move South, move West],
         "reasoning": "I should choose a tile to build extras. Because there is already 1 Road on my tile, I should not build road anymore. Because there is 1 Wheat on my tile, I should irrigate.",
         "plan": "Workers should not build road because there is already 1 Road on the current tile. As there is 1 Wheat on the current tile, Workers should irrigate."
     },

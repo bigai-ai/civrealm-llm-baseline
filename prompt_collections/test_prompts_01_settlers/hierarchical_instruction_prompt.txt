@@ -36,18 +36,18 @@ User:
 You are controlling unit: Settlers 104.
 The zoomed-out observation is {current_block: [4 tiles unexplored, 1 Ocean, 4 Forest, 8 Grassland, 7 Hills, 1 Mountains, 4 Plains, 1 Minor Tribe Village, 1 Fish, 1 city], block_north_1: [17 Ocean, 1 Forest, 1 Grassland, 1 Mountains, 5 Plains], block_south_1: [5 Ocean, 2 Desert, 2 Forest, 2 Grassland, 2 Hills, 4 Jungle, 2 Mountains, 4 Plains, 1 Wheat, 2 Wine...]}.
 The zoomed-in observation is {current_tile: [Grassland, Resources, 1 City belong to myself], tile_north_1: [Hills], tile_south_1: [Mountains, River], tile_east_1: [Grassland], tile_west_1: [Forest, River]}.
-The available actions are [join city,  move north, move south, move west, move east, irrigate].
+The available actions are [join city,  move North, move South, move West, move East, irrigate].
 From advisor: We are in peace. So explorer should explore unexplored area. Settlers should build cities near extras. Cities should build more Settlers.
 
 Response:
 {
     "thoughts": {
         "thought": "I am controlling Settlers 104. There are Resources on my tile. But I am standing on a city so I cannot build a new city in position. Advisor asks to build new city, so I cannot choose join city. I should move away.",
-        "review": Available actions are [join city,  move north, move south, move west, move east, keep activity],
+        "review": Available actions are [join city,  move North, move South, move West, move East, keep activity],
         "reasoning": "I should build city on a plain close to map extras or rivers. There is a minimum distance between two cities. But I am standing on a city. So I have to move away first.",
         "plan": "- Settlers should move south since now the Settlers are two close to an existing city.\n- Move close to the Wheat and Wine.\n- 'build city' close to Wheat and Wine.\n- Do not 'join city'!"
     },
-    "command": {"name": "finalDecision", "input": {"action": "move south"}}
+    "command": {"name": "finalDecision", "input": {"action": "move South"}}
 }
 
 
@@ -57,7 +57,7 @@ User:
 You are controlling unit: Settlers 103.
 The zoomed-out observation is {current_block: [4 tiles unexplored, 1 Ocean, 4 Forest, 8 Grassland, 7 Hills, 1 Mountains, 4 Plains, 1 Minor Tribe Village, 1 Fish, 1 city], block_north_1: [17 Ocean, 1 Forest, 1 Grassland, 1 Mountains, 5 Plains], block_south_1: [5 Ocean, 2 Desert, 2 Forest, 2 Grassland, 2 Hills, 4 Jungle, 2 Mountains, 4 Plains, 1 Wheat, 2 Wine...]}.
 The zoomed-in observation is {current_tile: [Grassland], tile_north_1: [Hills, Coal], tile_south_1: [Mountains, River], tile_east_1: [Grassland], tile_west_1: [Forest, River], tile_east_2: [Grassland, Wheat]}.
-The available actions are [join city, move north, move south, move west, move east, irrigate].
+The available actions are [join city, move North, move South, move West, move East, irrigate].
 From advisor: We are in peace. So explorer should explore unexplored area. Settlers should build cities near extras. Cities should build more Settlers.
 
 
@@ -65,7 +65,7 @@ Response:
 {
     "thoughts": {
         "thought": "I am controlling Settlers 103. Advisor tells us to build cities near map extras. Once I see Wheat, Resources, Wine, Silk, Coal, Whale, or some plain or grassland with river, I should consider the action 'build city'.",
-        "review": "available actions are [build city, move north, move south, move west, move east, irrigate], I should choose one from the list",
+        "review": "available actions are [build city, move North, move South, move West, move East, irrigate], I should choose one from the list",
         "reasoning": "I can see wheat and Coal around me within distance 2, and a river flows by. These are all good facts to make a city develop. I should build city here.",
         "plan": "- The surrounding environment is good.\n- I should build city now."
     },

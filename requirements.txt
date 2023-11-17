@@ -1,7 +1,7 @@
-tiktoken
-openai
-langchain
-pinecone-client
+tiktoken==0.4.0
+openai==0.28.0
+langchain==0.0.279
+pinecone-client==2.2.2
 func-timeout
 requests
 ipdb
