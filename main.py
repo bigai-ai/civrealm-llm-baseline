@@ -28,11 +28,8 @@ warnings.filterwarnings('ignore',
 
 
 def main():
-    # env = gymnasium.make('freeciv/FreecivBase-v0')
 
     env = gymnasium.make('freeciv/FreecivLLM-v0')
-    # env = gymnasium.make('freeciv/FreecivMinitask-v0')
-    env = LLMWrapper(env)
     agent = MastabaAgent(max_deconflict_depth=3)
     # agent = BaseLangAgent()
 
@@ -48,11 +45,9 @@ def main():
             done = terminated or truncated
 
             step += 1
-            print(
-                f'Step: {step}, Turn: {info["turn"]}, ' +
-                f'Reward: {reward}, Terminated: {terminated}, ' +
-                f'Truncated: {truncated}'
-            )
+            print(f'Step: {step}, Turn: {info["turn"]}, ' +
+                  f'Reward: {reward}, Terminated: {terminated}, ' +
+                  f'Truncated: {truncated}')
         except Exception as e:
             fc_logger.error(repr(e))
             raise e

@@ -38,9 +38,16 @@ from agents.prompt_handlers.base_prompt_handler import BasePromptHandler
 
 from .base_worker import BaseWorker
 
-MOVE_NAMES = {'goto_0': 'move_NorthWest', 'goto_1': 'move_North', 'goto_2': 'move_NorthEast',
-              'goto_3': 'move_West', 'goto_4': 'move_East', 'goto_5': 'move_SouthWest',
-              'goto_6': 'move_South', 'goto_7': 'move_SouthEast'}
+MOVE_NAMES = {
+    'goto_0': 'move_NorthWest',
+    'goto_1': 'move_North',
+    'goto_2': 'move_NorthEast',
+    'goto_3': 'move_West',
+    'goto_4': 'move_East',
+    'goto_5': 'move_SouthWest',
+    'goto_6': 'move_South',
+    'goto_7': 'move_SouthEast'
+}
 INVERSE_MOVE_NAMES = {val: key for key, val in MOVE_NAMES.items()}
 
 
@@ -150,7 +157,8 @@ class AzureGPTWorker(BaseWorker):
 
         for move_action, move_name in MOVE_NAMES.items():
             if self.taken_actions_list_needs_update(move_name, 15, 4):
-                return None, self.prompt_handler.insist_various_actions(action=move_name)
+                return None, self.prompt_handler.insist_various_actions(
+                    action=move_name)
         """
         if self.taken_actions_list_needs_update('goto', 15, 4):
             return None, self.prompt_handler.insist_various_actions(action="goto")
@@ -168,8 +176,6 @@ class AzureGPTWorker(BaseWorker):
                                             model=self.model,
                                             messages=self.dialogue,
                                             request_timeout=10)
-
-
 
     def generate_command(self, prompt: str):
         self.add_user_message_to_dialogue(prompt +
@@ -195,7 +201,8 @@ class AzureGPTWorker(BaseWorker):
             command_input = command_json['command']['input']
             command_name = command_json['command']['name']
         except Exception as e:
-            fc_logger.error(f'Commond json parsing error: {e}')
+            fc_logger.error(
+                f'\nRESPONSE:{response}\nCommond json parsing error: {e}')
             print('Not in given json format, retrying...')
             return None, self.prompt_handler.insist_json()
 
