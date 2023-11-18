@@ -24,8 +24,8 @@ from agents.prompt_handlers.base_prompt_handler import BasePromptHandler
 warnings.filterwarnings('ignore')
 
 cwd = os.getcwd()
-openai_keys_file = os.path.join(cwd, "agents/civ_autogpt/openai_keys.txt")
-saved_dialogue_file = os.path.join(
+OPENAI_KEYS_FILE = os.path.join(cwd, "agents/civ_autogpt/openai_keys.txt")
+SAVED_DIALOGUE_FILE = os.path.join(
     cwd, "agents/civ_autogpt/saved_dialogues/saved_dialogue.txt")
 task_prompt_file = os.path.join(cwd,
                                 "agents/civ_autogpt/prompts/task_prompt.txt")
@@ -116,7 +116,7 @@ class GPTAgent:
 
     @staticmethod
     def load_openai_keys():
-        with open(openai_keys_file, "r") as f:
+        with open(OPENAI_KEYS_FILE, "r") as f:
             context = f.read()
         return context.split('\n')
 
@@ -130,12 +130,12 @@ class GPTAgent:
         self.add_user_message_to_dialogue(task_prompt)
         return task_prompt
 
-    def load_saved_dialogue(self, load_path=saved_dialogue_file):
+    def load_saved_dialogue(self, load_path=SAVED_DIALOGUE_FILE):
         # print("reading task prompt from {}".format(task_prompt_file))
         with open(load_path, "r") as f:
             self.dialogue = eval(f.read())
 
-    def save_dialogue_to_file(self, save_path=saved_dialogue_file):
+    def save_dialogue_to_file(self, save_path=SAVED_DIALOGUE_FILE):
         with open(save_path, "w", encoding='utf-8') as f:
             for message in self.dialogue:
                 f.write(str(message) + '\n')
@@ -422,11 +422,10 @@ class GPTAgent:
         return response
 
     def reset(self):
-        # super().reset()
+
         self.dialogue = []
         self.message = ''
         self.taken_actions_list = []
-        # self.gpt_extractor.reset()
 
         self.openai_api_keys = self.load_openai_keys()
         self.state_prompt = self._load_state_prompt()

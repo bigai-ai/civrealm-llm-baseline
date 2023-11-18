@@ -1,4 +1,4 @@
-# Copyright (C) 2023  The Freeciv-gym project
+# Copyright (C) 2023  The CivRealm project
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
@@ -33,22 +33,9 @@ from langchain.llms import OpenAI, AzureOpenAI
 from langchain.chains.question_answering import load_qa_chain
 
 from civrealm.freeciv.utils.freeciv_logging import fc_logger
-# from civrealm.freeciv.utils.language_agent_utility import MOVE_NAMES, INVERSE_MOVE_NAMES
 from agents.prompt_handlers.base_prompt_handler import BasePromptHandler
 
 from .base_worker import BaseWorker
-
-MOVE_NAMES = {
-    'goto_0': 'move_NorthWest',
-    'goto_1': 'move_North',
-    'goto_2': 'move_NorthEast',
-    'goto_3': 'move_West',
-    'goto_4': 'move_East',
-    'goto_5': 'move_SouthWest',
-    'goto_6': 'move_South',
-    'goto_7': 'move_SouthEast'
-}
-INVERSE_MOVE_NAMES = {val: key for key, val in MOVE_NAMES.items()}
 
 
 class AzureGPTWorker(BaseWorker):
@@ -143,28 +130,25 @@ class AzureGPTWorker(BaseWorker):
     def handle_command_final_decision(self, command_input, obs_input_prompt,
                                       current_avail_actions):
         exec_action = command_input['action']
-        current_avail_actions = [x.lower() for x in current_avail_actions]
-        if exec_action.lower() not in current_avail_actions:
-            print(
-                f'{self.name}\'s chosen action "{exec_action}" not in the available action list, available actions are {current_avail_actions}, retrying...'
-            )
+        lower_avail_actions = [x.lower() for x in current_avail_actions]
+        if exec_action.lower() not in lower_avail_actions:
+            print(f'{self.name}\'s chosen action "{exec_action}" not in the ' +
+                  f'available action list, available actions are ' +
+                  f'{current_avail_actions}, retrying...')
             fc_logger.error(
-                f'{self.name}\'s chosen action "{exec_action}" not in the available action list, available actions are {current_avail_actions}, retrying...'
-            )
+                f'{self.name}\'s chosen action "{exec_action}"',
+                'not in the available action list, available',
+                f'actions are {current_avail_actions}, retrying...')
             return None, self.prompt_handler.insist_avail_action()
 
         self.taken_actions_list.append(command_input['action'])
 
-        for move_action, move_name in MOVE_NAMES.items():
+        for move_name in current_avail_actions:
+            if move_name[:4] != "move":
+                continue
             if self.taken_actions_list_needs_update(move_name, 15, 4):
                 return None, self.prompt_handler.insist_various_actions(
                     action=move_name)
-        """
-        if self.taken_actions_list_needs_update('goto', 15, 4):
-            return None, self.prompt_handler.insist_various_actions(action="goto")
-        if self.taken_actions_list_needs_update('keep activity', 15, 0):
-            return None, self.prompt_handler.insist_various_actions(action="keep activity")
-        """
 
         return exec_action, ''
 
@@ -190,7 +174,10 @@ class AzureGPTWorker(BaseWorker):
         content = response['choices'][0]['message']['content']
         start_index = content.find('{')
         end_index = content.rfind('}') + 1
-        return json.loads(content[start_index:end_index])
+        rlack = content.count("{") - content.count("}")
+        if rlack > 0:
+            content = content[start_index:end_index] + "}" * rlack
+        return json.loads(content)
 
     def process_command(self, response, obs_input_prompt,
                         current_avail_actions):

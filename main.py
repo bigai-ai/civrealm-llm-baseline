@@ -1,4 +1,4 @@
-# Copyright (C) 2023  The Freeciv-gym project
+# Copyright (C) 2023  The CivRealm project
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
@@ -7,7 +7,7 @@
 #
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY without even the implied warranty of MERCHANTABILITY
-# or FITNESS FOR A PARsrc/freeciv_gym/configs/default_setting.ymlTICULAR PURPOSE.  See the GNU General Public License
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
 #
 # You should have received a copy of the GNU General Public License along
@@ -21,6 +21,8 @@ from agents import BaselineLanguageAgent, AutoGPTAgent, BaseLangAgent, MastabaAg
 from civrealm.freeciv.utils.freeciv_logging import fc_logger
 from civrealm.configs import fc_args
 from civrealm.envs.freeciv_wrapper.llm_wrapper import LLMWrapper
+from agents.utils import print_step, print_action, print_current
+from agents import utils
 
 # FIXME: This is a hack to suppress the warning about the gymnasium spaces. Currently Gymnasium does not support hierarchical actions.
 warnings.filterwarnings('ignore',
@@ -28,7 +30,12 @@ warnings.filterwarnings('ignore',
 
 
 def main():
+    """
+    Main
 
+    Main entry of the program.
+    Starts a single-player Freeciv game against rule-based AI.
+    """
     env = gymnasium.make('freeciv/FreecivLLM-v0')
     agent = MastabaAgent(max_deconflict_depth=3)
     # agent = BaseLangAgent()
@@ -45,9 +52,9 @@ def main():
             done = terminated or truncated
 
             step += 1
-            print(f'Step: {step}, Turn: {info["turn"]}, ' +
-                  f'Reward: {reward}, Terminated: {terminated}, ' +
-                  f'Truncated: {truncated}')
+            print_step(f'Step: {step}, Turn: {info["turn"]}, ' +
+                       f'Reward: {reward}, Terminated: {terminated}, ' +
+                       f'Truncated: {truncated}')
         except Exception as e:
             fc_logger.error(repr(e))
             raise e

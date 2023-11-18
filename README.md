@@ -1,9 +1,9 @@
-# freeciv-llm-baseline
+# civ-LLMs
 
 The llm baseline part for freeciv env.
 
 USAGE:
-(1) Install freeciv-gym
+(1) Install civrealm
 
 (2) Set env varibles.
 

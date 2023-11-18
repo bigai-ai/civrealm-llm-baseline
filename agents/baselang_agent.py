@@ -1,4 +1,4 @@
-# Copyright (C) 2023  The Freeciv-gym project
+# Copyright (C) 2023  The CivRealm project
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
@@ -21,14 +21,15 @@ from civrealm.freeciv.utils.language_agent_utility import make_action_list_reada
 
 from .language_agent import LanguageAgent
 from .workers import AzureGPTWorker
-
+from .utils import print_current, print_action
 
 # Wrong Interpretation of action names. Goto Yexin to fix it.
+
 
 class BaseLangAgent(LanguageAgent):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.dialogue_dir = os.path.join(os.getcwd(), 'agents/civ_autogpt/saved_dialogues/')
+        self.dialogue_dir = os.path.join(os.getcwd(), 'saved_dialogues/')
         if not os.path.exists(self.dialogue_dir):
             os.makedirs(self.dialogue_dir)
 
@@ -52,7 +53,12 @@ class BaseLangAgent(LanguageAgent):
         current_unit_obs = actor_dict['observations']['minimap']
         # if ctrl_type == "city":
         #     available_actions += ["'keep activity'"]
-        prompt = f'The {ctrl_type} is {actor_name}, observation is {current_unit_obs}. Your available action list is {available_actions}.'
+        if ctrl_type == "city":
+            producing = actor_dict['observations'].get('producing', "NOTHING")
+            # print("===+++=== PRODUCING_BASELANG", producing)
+            prompt = f'The {ctrl_type} is {actor_name}, observation is {current_unit_obs}. The city is producing {producing}. Your available action list is {available_actions}.'
+        else:
+            prompt = f'The {ctrl_type} is {actor_name}, observation is {current_unit_obs}. Your available action list is {available_actions}.'
         system_message = self.info['llm_info'].get("message", "")
         system_message = ("Game scenario message is: "
                           if system_message else "") + system_message
@@ -74,13 +80,12 @@ class BaseLangAgent(LanguageAgent):
         obs_input_prompt = self.get_obs_input_prompt(ctrl_type, actor_name,
                                                      actor_dict,
                                                      available_actions)
-        print(f'Current {ctrl_type}: {actor_name}')
+        print_current(f'Current {ctrl_type}: {actor_name}')
         exec_action_name = worker.choose_action(obs_input_prompt,
                                                 available_actions)
-        print(f'Action chosen for {actor_name}:', exec_action_name)
+        print_action(f'Action chosen for {actor_name}:', exec_action_name)
         # exec_action_name = get_action_from_readable_name(exec_action_name)
-        if (exec_action_name
-            and exec_action_name != "produce "+producing):
+        if (exec_action_name and exec_action_name != "produce " + producing):
             self.chosen_actions.put((ctrl_type, actor_id, exec_action_name))
 
         worker.save_dialogue_to_file(

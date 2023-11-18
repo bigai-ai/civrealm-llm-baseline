@@ -1,4 +1,4 @@
-# Copyright (C) 2023  The Freeciv-gym project
+# Copyright (C) 2023  The CivRealm project
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
@@ -21,9 +21,6 @@ from .baselang_agent import BaseLangAgent
 from .workers import MastabaWorker
 from agents.redundants.improvement_consts import UNIT_TYPES, IMPR_TYPES
 from config import INDIVIDUAL_PROMPT_DEFAULT, PROMPT_SOLUTIONS
-
-PROD_KINDS = ["improvement", "unit"]
-PROD_REF = IMPR_TYPES + UNIT_TYPES
 
 
 class MastabaAgent(BaseLangAgent):
@@ -125,9 +122,9 @@ class MastabaAgent(BaseLangAgent):
         prompt = ""
 
         if ctrl_type == "city":
-            producing = actor_dict['observations']['producing']
+            producing = actor_dict['observations'].get('producing', "NOTHING")
             available_actions += ['produce ' + producing]
-
+            # print("===+++=== PRODUCING", producing)
             prompt = self.strategy_maker.prompt_handler.city_obs_action(
                 actor_name=actor_name,
                 ctrl_type=ctrl_type,
@@ -156,10 +153,10 @@ class MastabaAgent(BaseLangAgent):
 
         # obs_input_prompt = self.strategy_maker.prompt_handler.generate(
         #     "advisor_advise")
-        print("OBS_INPUT_PROMPT", obs_input_prompt)
+        # print("OBS_INPUT_PROMPT", obs_input_prompt)
         exec_action_name = self.strategy_maker.choose_action(
             obs_input_prompt, ["suggestion"])
-        print("GENERAL_ADVISE", exec_action_name)
+        # print("GENERAL_ADVISE", exec_action_name)
         self.strategy_maker.save_dialogue_to_file(
             os.path.join(
                 self.dialogue_dir,
