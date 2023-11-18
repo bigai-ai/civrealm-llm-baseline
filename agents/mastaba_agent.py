@@ -17,7 +17,7 @@ import pickle
 import os
 import time
 import threading
-from .parallel_auto_gpt_agent import BaseLangAgent
+from .baselang_agent import BaseLangAgent
 from .workers import MastabaWorker
 from agents.redundants.improvement_consts import UNIT_TYPES, IMPR_TYPES
 from config import INDIVIDUAL_PROMPT_DEFAULT, PROMPT_SOLUTIONS
@@ -48,11 +48,10 @@ class MastabaAgent(BaseLangAgent):
             prompt_prefix = PROMPT_SOLUTIONS[name]
         else:
             prompt_prefix = PROMPT_SOLUTIONS['vanilla']
-        self.workers[(entity_type, entity_id)] = MastabaWorker(
-            ctrl_type=entity_type,
-            actor_id=entity_id,
-            prompt_prefix=prompt_prefix)
-
+        self.workers[(entity_type,
+                      entity_id)] = MastabaWorker(ctrl_type=entity_type,
+                                                  actor_id=entity_id,
+                                                  prompt_prefix=prompt_prefix)
 
     def get_advisor_input_prompt(self, obs, info):
         """
@@ -127,7 +126,7 @@ class MastabaAgent(BaseLangAgent):
 
         if ctrl_type == "city":
             producing = actor_dict['observations']['producing']
-            available_actions += ['produce '+producing]
+            available_actions += ['produce ' + producing]
 
             prompt = self.strategy_maker.prompt_handler.city_obs_action(
                 actor_name=actor_name,
@@ -136,8 +135,7 @@ class MastabaAgent(BaseLangAgent):
                 zoom_in_obs=zoom_in_obs,
                 producint=producing,
                 available_actions=available_actions,
-                general_advise=self.general_advise
-            )
+                general_advise=self.general_advise)
         elif ctrl_type == "unit":
             prompt = self.strategy_maker.prompt_handler.unit_obs_action(
                 actor_name=actor_name,
@@ -145,10 +143,8 @@ class MastabaAgent(BaseLangAgent):
                 zoom_out_obs=zoom_out_obs,
                 zoom_in_obs=zoom_in_obs,
                 available_actions=available_actions,
-                general_advise=self.general_advise
-            )
+                general_advise=self.general_advise)
         return prompt
-
 
     def generate_general_advise(self):
         """
@@ -211,4 +207,3 @@ class MastabaAgent(BaseLangAgent):
         print(self.chosen_actions.qsize(), self.current_deconflict_depth)
         # super().regenerate_conflict_actions(observations, info)
         self.handle_new_turn(observations, info)
-
