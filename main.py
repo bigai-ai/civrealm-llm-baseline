@@ -28,13 +28,13 @@ warnings.filterwarnings('ignore',
 
 
 def main():
-    env = gymnasium.make('freeciv/FreecivBase-v0')
-    # agent = BaselineLanguageAgent()
+    # env = gymnasium.make('freeciv/FreecivBase-v0')
 
-    # env = gymnasium.make('freeciv/FreecivLLM-v0')
+    env = gymnasium.make('freeciv/FreecivLLM-v0')
     # env = gymnasium.make('freeciv/FreecivMinitask-v0')
     env = LLMWrapper(env)
     agent = MastabaAgent(max_deconflict_depth=3)
+    # agent = BaseLangAgent()
 
     observations, info = env.reset()
 
@@ -47,8 +47,6 @@ def main():
                 action)
             done = terminated or truncated
 
-            with open("observation.txt", "wb") as fp:
-                pickle.dump({"obs": observations, "info": info}, fp)
             step += 1
             print(
                 f'Step: {step}, Turn: {info["turn"]}, ' +
