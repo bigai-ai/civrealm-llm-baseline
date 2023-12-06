@@ -36,7 +36,7 @@ def main():
     Main entry of the program.
     Starts a single-player Freeciv game against rule-based AI.
     """
-    env = gymnasium.make('freeciv/FreecivLLM-v0')
+    env = gymnasium.make('civrealm/FreecivLLM-v0')
     agent = MastabaAgent(max_deconflict_depth=3)
     # agent = BaseLangAgent()
 
